@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Editor de Posiciones - Plano Taller</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+    }
+    .panel-lateral {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 10;
+    }
+    .modo-toggle {
+      padding: 8px 12px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .plano-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background-image: url('plano-fondo.png');
+      background-size: cover;
+      background-position: center;
+      border: 2px solid #333;
+    }
+    .bloque {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background-color: #ccc;
+      border: 1px solid #000;
+      border-radius: 6px;
+      font-size: 9px;
+      text-align: center;
+      padding: 2px;
+      cursor: grab;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      box-sizing: border-box;
+      line-height: 1.2;
+    }
+    .bloque .numero {
+      font-weight: bold;
+      font-size: 10px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 300px;
+    }
+    .modal-content input {
+      width: 100%;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    .close {
+      float: right;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div class="panel-lateral">
+  <button class="modo-toggle" onclick="alternarModo()" id="botonModo">Cambiar a modo edición</button>
+</div>
+<div class="plano-container" id="plano"></div>
+
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <span class="close" id="closeModal">&times;</span>
+    <h3>Editar Bloque</h3>
+    <input type="text" id="actividad" placeholder="Nº Actividad">
+    <input type="text" id="matricula" placeholder="Matrícula">
+    <input type="text" id="marca" placeholder="Marca">
+    <input type="text" id="cliente" placeholder="Cliente">
+    <input type="text" id="trabajador" placeholder="Trabajador">
+    <button onclick="guardarDatos()">Guardar</button>
+    <button onclick="liberarDatos()">Liberar</button>
+  </div>
+</div>
+
+<script>
+const plano = document.getElementById('plano');
+const modal = document.getElementById('modal');
+const actividadInput = document.getElementById('actividad');
+const clienteInput = document.getElementById('cliente');
+const trabajadorInput = document.getElementById('trabajador');
+const matriculaInput = document.getElementById('matricula');
+const marcaInput = document.getElementById('marca');
+const botonModo = document.getElementById('botonModo');
+const closeModal = document.getElementById('closeModal');
+
+let bloques = [];
+let datos = [];
+let modoEdicion = false;
+let bloqueActual;
+
+const posicionesFijas = [
+  {top: 303, left: 427}, {top: 304, left: 478}, {top: 304, left: 530}, {top: 304, left: 582}, {top: 303, left: 634},
+  {top: 303, left: 686}, {top: 477, left: 428}, {top: 478, left: 481}, {top: 477, left: 534}, {top: 477, left: 587},
+  {top: 478, left: 639}, {top: 562, left: 201}, {top: 561, left: 310}, {top: 562, left: 441}, {top: 562, left: 571},
+  {top: 219, left: 244}, {top: 220, left: 377}, {top: 218, left: 515}, {top: 219, left: 646}, {top: 217, left: 774},
+  {top: 167, left: 242}, {top: 169, left: 320}, {top: 169, left: 393}, {top: 169, left: 476}, {top: 170, left: 553},
+  {top: 172, left: 631}, {top: 171, left: 718}, {top: 170, left: 803}, {top: 499, left: 85}, {top: 293, left: 85},
+];
+
+function crearBloques() {
+  for (let i = 0; i < 30; i++) {
+    const div = document.createElement('div');
+    div.className = 'bloque';
+    div.dataset.index = i;
+    div.style.top = posicionesFijas[i].top + 'px';
+    div.style.left = posicionesFijas[i].left + 'px';
+    plano.appendChild(div);
+    bloques.push(div);
+    datos.push({actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false});
+
+    div.addEventListener('click', () => {
+      if (!modoEdicion) abrirModal(div);
+    });
+
+    let isDragging = false;
+    let offsetX, offsetY;
+
+    div.addEventListener('mousedown', (e) => {
+      if (!modoEdicion) return;
+      isDragging = true;
+      offsetX = e.offsetX;
+      offsetY = e.offsetY;
+      div.style.cursor = 'grabbing';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging || !modoEdicion) return;
+      const rect = plano.getBoundingClientRect();
+      const x = e.clientX - rect.left - offsetX;
+      const y = e.clientY - rect.top - offsetY;
+      if (x >= 0 && y >= 0 && x <= plano.offsetWidth - 50 && y <= plano.offsetHeight - 50) {
+        div.style.left = `${x}px`;
+        div.style.top = `${y}px`;
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        div.style.cursor = 'grab';
+      }
+    });
+  }
+}
+
+function alternarModo() {
+  modoEdicion = !modoEdicion;
+  botonModo.textContent = modoEdicion ? 'Bloquear edición' : 'Cambiar a modo edición';
+}
+
+function abrirModal(bloque) {
+  bloqueActual = bloque;
+  const index = bloque.dataset.index;
+  const info = datos[index];
+  actividadInput.value = info.actividad;
+  clienteInput.value = info.cliente;
+  trabajadorInput.value = info.trabajador;
+  matriculaInput.value = info.matricula;
+  marcaInput.value = info.marca;
+  modal.style.display = 'flex';
+}
+
+function guardarDatos() {
+  const index = bloqueActual.dataset.index;
+  datos[index] = {
+    actividad: actividadInput.value,
+    cliente: clienteInput.value,
+    trabajador: trabajadorInput.value,
+    matricula: matriculaInput.value.toUpperCase(),
+    marca: marcaInput.value.toUpperCase(),
+    ocupado: true
+  };
+  renderizarBloques();
+  modal.style.display = 'none';
+}
+
+function liberarDatos() {
+  const index = bloqueActual.dataset.index;
+  datos[index] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
+  renderizarBloques();
+  modal.style.display = 'none';
+}
+
+function renderizarBloques() {
+  bloques.forEach((bloque, i) => {
+    const info = datos[i];
+    if (info.ocupado) {
+      bloque.style.backgroundColor = info.trabajador ? '#f00' : '#8f8';
+      bloque.innerHTML = `<div class='numero'>${i + 1}</div>
+        <div style='font-size:8px;'>Act: ${info.actividad}<br>${info.cliente}</div>`;
+    } else {
+      bloque.style.backgroundColor = '#ccc';
+      bloque.innerHTML = `<div class='numero'>${i + 1}</div>`;
+    }
+  });
+}
+
+closeModal.onclick = () => modal.style.display = 'none';
+
+crearBloques();
+</script>
+
+</body>
+</html>
