@@ -103,7 +103,7 @@
 </div>
 
 <div id="mensajeEstado" style="position:fixed; bottom:10px; right:10px; background:#eee; padding:8px 12px; border-radius:6px; box-shadow: 0 0 4px rgba(0,0,0,0.3); font-size:14px; display:none;">Estado</div>
-<div style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-family:monospace; z-index:20;">Versión 1.1.0</div>
+<div style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-family:monospace; z-index:20;">Versión 1.1.1</div>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
@@ -161,8 +161,13 @@ function crearBloques() {
     const globalIndex = ubicacionActual === 'taller' ? i : i + 30;
     div.dataset.index = globalIndex;
     const pos = posiciones[i];
-    div.style.top = pos.top + 'px';
-    div.style.left = pos.left + 'px';
+    if (datos[globalIndex] && datos[globalIndex].top !== undefined && datos[globalIndex].left !== undefined) {
+      div.style.top = datos[globalIndex].top + 'px';
+      div.style.left = datos[globalIndex].left + 'px';
+    } else {
+      div.style.top = pos.top + 'px';
+      div.style.left = pos.left + 'px';
+    }
     plano.appendChild(div);
     bloques.push(div);
     if (!datos[globalIndex]) datos[globalIndex] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
@@ -197,6 +202,11 @@ function crearBloques() {
       if (isDragging) {
         isDragging = false;
         div.style.cursor = 'grab';
+        const index = div.dataset.index;
+        if (!datos[index]) datos[index] = {};
+        datos[index].top = parseInt(div.style.top);
+        datos[index].left = parseInt(div.style.left);
+        db.collection('bloques').doc(index).set(datos[index], { merge: true });
       }
     });
   }
