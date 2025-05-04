@@ -172,9 +172,16 @@ function crearBloques() {
     div.dataset.index = globalIndex;
     const pos = posiciones[i];
     if (datos[globalIndex] && datos[globalIndex].topPct !== undefined && datos[globalIndex].leftPct !== undefined) {
-      div.style.top = datos[globalIndex].topPct + '%';
-      div.style.left = datos[globalIndex].leftPct + '%';
+      div.style.top = datos[globalIndex].topPct.toFixed(2) + '%';
+      div.style.left = datos[globalIndex].leftPct.toFixed(2) + '%';
     } else {
+      const topPct = (pos.top / plano.offsetHeight) * 100;
+      const leftPct = (pos.left / plano.offsetWidth) * 100;
+      datos[globalIndex].topPct = topPct;
+      datos[globalIndex].leftPct = leftPct;
+      db.collection('bloques').doc(globalIndex.toString()).set(datos[globalIndex], { merge: true });
+      div.style.top = topPct.toFixed(2) + '%';
+      div.style.left = leftPct.toFixed(2) + '%';
       div.style.top = pos.top + 'px';
       div.style.left = pos.left + 'px';
     }
