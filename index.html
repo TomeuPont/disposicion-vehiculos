@@ -161,9 +161,9 @@ function crearBloques() {
     const globalIndex = ubicacionActual === 'taller' ? i : i + 30;
     div.dataset.index = globalIndex;
     const pos = posiciones[i];
-    if (datos[globalIndex] && datos[globalIndex].top !== undefined && datos[globalIndex].left !== undefined) {
-      div.style.top = datos[globalIndex].top + 'px';
-      div.style.left = datos[globalIndex].left + 'px';
+    if (datos[globalIndex] && datos[globalIndex].topPct !== undefined && datos[globalIndex].leftPct !== undefined) {
+      div.style.top = datos[globalIndex].topPct + '%';
+      div.style.left = datos[globalIndex].leftPct + '%';
     } else {
       div.style.top = pos.top + 'px';
       div.style.left = pos.left + 'px';
@@ -204,8 +204,12 @@ function crearBloques() {
         div.style.cursor = 'grab';
         const index = div.dataset.index;
         if (!datos[index]) datos[index] = {};
+        const topPercent = (parseInt(div.style.top) / plano.offsetHeight) * 100;
+        const leftPercent = (parseInt(div.style.left) / plano.offsetWidth) * 100;
         datos[index].top = parseInt(div.style.top);
         datos[index].left = parseInt(div.style.left);
+        datos[index].topPct = topPercent;
+        datos[index].leftPct = leftPercent;
         db.collection('bloques').doc(index).set(datos[index], { merge: true });
       }
     });
