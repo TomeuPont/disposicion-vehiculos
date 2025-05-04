@@ -1,14 +1,8 @@
-<!-- Se añade Firebase SDK e integración -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Editor de Posiciones - Plano Taller</title>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-<!-- Indicadores de estado y versión -->
-<div id="mensajeEstado" style="position:fixed; bottom:10px; right:10px; background:#eee; padding:8px 12px; border-radius:6px; box-shadow: 0 0 4px rgba(0,0,0,0.3); font-size:14px; display:none;">Estado</div>
-<div style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-family:monospace; z-index:20;">Versión 1.1.1</div>
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <title>Plano Taller Camiones</title>
   <style>
     body {
       margin: 0;
@@ -31,10 +25,10 @@
       position: relative;
       width: 100%;
       height: 100%;
+      background-image: url('plano-fondo.png');
       background-size: cover;
       background-position: center;
       border: 2px solid #333;
-      background-color: #f0f0f0;
     }
     .bloque {
       position: absolute;
@@ -108,17 +102,10 @@
   </div>
 </div>
 
-<script>
-// Configuración de Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyD4WlmHuBbC-CvuUk7S_f2FVg4ZCTyNHpQ",
-  authDomain: "planos-taller-campa.firebaseapp.com",
-  projectId: "planos-taller-campa"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+<div id="mensajeEstado" style="position:fixed; bottom:10px; right:10px; background:#eee; padding:8px 12px; border-radius:6px; box-shadow: 0 0 4px rgba(0,0,0,0.3); font-size:14px; display:none;">Estado</div>
+<div style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-family:monospace; z-index:20;">Versión 1.0.0</div>
 
-// Código de funcionamiento
+<script>
 let bloques = [];
 let datos = {};
 let modoEdicion = false;
@@ -168,6 +155,7 @@ function crearBloques() {
     div.style.left = pos.left + 'px';
     plano.appendChild(div);
     bloques.push(div);
+    if (!datos[globalIndex]) datos[globalIndex] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
 
     div.addEventListener('click', () => {
       if (!modoEdicion) abrirModal(div);
@@ -192,10 +180,6 @@ function crearBloques() {
       if (x >= 0 && y >= 0 && x <= plano.offsetWidth - 50 && y <= plano.offsetHeight - 50) {
         div.style.left = `${x}px`;
         div.style.top = `${y}px`;
-        const index = div.dataset.index;
-        datos[index].top = y;
-        datos[index].left = x;
-        guardarFirestore(index);
       }
     });
 
@@ -213,12 +197,12 @@ function crearBloques() {
 function abrirModal(bloque) {
   bloqueActual = bloque;
   const index = bloque.dataset.index;
-  const info = datos[index] || {};
-  actividadInput.value = info.actividad || '';
-  clienteInput.value = info.cliente || '';
-  trabajadorInput.value = info.trabajador || '';
-  matriculaInput.value = info.matricula || '';
-  marcaInput.value = info.marca || '';
+  const info = datos[index];
+  actividadInput.value = info.actividad;
+  clienteInput.value = info.cliente;
+  trabajadorInput.value = info.trabajador;
+  matriculaInput.value = info.matricula;
+  marcaInput.value = info.marca;
   modal.style.display = 'flex';
 }
 
@@ -230,35 +214,26 @@ function guardarDatos() {
     trabajador: trabajadorInput.value,
     matricula: matriculaInput.value.toUpperCase(),
     marca: marcaInput.value.toUpperCase(),
-    ocupado: true,
-    top: parseInt(bloqueActual.style.top),
-    left: parseInt(bloqueActual.style.left)
+    ocupado: true
   };
   renderizarBloques();
-  guardarFirestore(index);
   modal.style.display = 'none';
 }
 
 function liberarDatos() {
   const index = bloqueActual.dataset.index;
-  datos[index] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false, top: parseInt(bloqueActual.style.top), left: parseInt(bloqueActual.style.left)};
+  datos[index] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
   renderizarBloques();
-  guardarFirestore(index);
   modal.style.display = 'none';
 }
 
 function renderizarBloques() {
   bloques.forEach((bloque) => {
     const i = parseInt(bloque.dataset.index);
-    const info = datos[i] || {};
-    if (info.top && info.left) {
-      bloque.style.top = info.top + 'px';
-      bloque.style.left = info.left + 'px';
-    }
+    const info = datos[i];
     if (info.ocupado) {
       bloque.style.backgroundColor = info.trabajador ? '#f00' : '#8f8';
-      bloque.innerHTML = `<div class='numero'>${i + 1}</div>
-        <div style='font-size:8px;'>Act: ${info.actividad}<br>${info.cliente}</div>`;
+      bloque.innerHTML = `<div class='numero'>${i + 1}</div><div style='font-size:8px;'>Act: ${info.actividad}<br>${info.cliente}</div>`;
     } else {
       bloque.style.backgroundColor = '#ccc';
       bloque.innerHTML = `<div class='numero'>${i + 1}</div>`;
@@ -266,39 +241,9 @@ function renderizarBloques() {
   });
 }
 
-function guardarFirestore(index) {
-  db.collection("bloques").doc(index.toString()).set(datos[index])
-    .then(() => mostrarMensaje('Guardado correctamente ✅', 'green'))
-    .catch(() => mostrarMensaje('Error al guardar ❌', 'red'));
-}
-
-function cargarDesdeFirestore() {
-  db.collection("bloques").get().then((querySnapshot) => {
-    querySnapshot.forEach((doc) => {
-      datos[doc.id] = doc.data();
-    });
-    crearBloques();
-  });
-}
-
 closeModal.onclick = () => modal.style.display = 'none';
 
-function mostrarMensaje(texto, color) {
-  const mensaje = document.getElementById('mensajeEstado');
-  mensaje.textContent = texto;
-  mensaje.style.background = color === 'green' ? '#d4edda' : '#f8d7da';
-  mensaje.style.color = color === 'green' ? '#155724' : '#721c24';
-  mensaje.style.display = 'block';
-  setTimeout(() => mensaje.style.display = 'none', 2500);
-}
-
-// Inicia con datos desde Firebase
-cargarDesdeFirestore();
-
-
-
-
-
-
+crearBloques();
+</script>
 </body>
 </html>
