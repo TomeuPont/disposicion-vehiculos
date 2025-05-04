@@ -1,8 +1,11 @@
+<!-- Se añade Firebase SDK e integración -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <title>Editor de Posiciones - Plano Taller</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <style>
     body {
       margin: 0;
@@ -102,6 +105,22 @@
 </div>
 
 <script>
+// Configuración de Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyD4WlmHuBbC-CvuUk7S_f2FVg4ZCTyNHpQ",
+  authDomain: "planos-taller-campa.firebaseapp.com",
+  projectId: "planos-taller-campa"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// Código de funcionamiento
+let bloques = [];
+let datos = {};
+let modoEdicion = false;
+let bloqueActual;
+let ubicacionActual = 'taller';
+
 const plano = document.getElementById('plano');
 const modal = document.getElementById('modal');
 const actividadInput = document.getElementById('actividad');
@@ -113,29 +132,38 @@ const botonModo = document.getElementById('botonModo');
 const botonUbicacion = document.getElementById('btnUbicacion');
 const closeModal = document.getElementById('closeModal');
 
-let bloques = [];
-let datos = [];
-let modoEdicion = false;
-let bloqueActual;
-let ubicacionActual = 'taller';
-
 const posicionesTaller = [...Array(30)].map((_, i) => ({top: 300 + (i % 5) * 60, left: 400 + Math.floor(i / 5) * 60}));
 const posicionesCampa = [...Array(30)].map((_, i) => ({top: 100 + (i % 5) * 60, left: 100 + Math.floor(i / 5) * 60}));
+
+function alternarUbicacion() {
+  ubicacionActual = ubicacionActual === 'taller' ? 'campa' : 'taller';
+  botonUbicacion.textContent = ubicacionActual === 'taller' ? 'Campa' : 'Taller';
+  crearBloques();
+}
+
+function alternarModo() {
+  modoEdicion = !modoEdicion;
+  botonModo.textContent = modoEdicion ? 'Bloquear edición' : 'Cambiar a modo edición';
+}
+
+function actualizarFondo() {
+  plano.style.backgroundImage = `url('${ubicacionActual === 'taller' ? 'plano-fondo.png' : 'plano-campa.png'}')`;
+}
 
 function crearBloques() {
   plano.innerHTML = '';
   bloques = [];
+  const posiciones = ubicacionActual === 'taller' ? posicionesTaller : posicionesCampa;
   for (let i = 0; i < 30; i++) {
     const div = document.createElement('div');
     div.className = 'bloque';
     const globalIndex = ubicacionActual === 'taller' ? i : i + 30;
     div.dataset.index = globalIndex;
-    const pos = ubicacionActual === 'taller' ? posicionesTaller[i] : posicionesCampa[i];
+    const pos = posiciones[i];
     div.style.top = pos.top + 'px';
     div.style.left = pos.left + 'px';
     plano.appendChild(div);
     bloques.push(div);
-    if (!datos[globalIndex]) datos[globalIndex] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
 
     div.addEventListener('click', () => {
       if (!modoEdicion) abrirModal(div);
@@ -160,6 +188,10 @@ function crearBloques() {
       if (x >= 0 && y >= 0 && x <= plano.offsetWidth - 50 && y <= plano.offsetHeight - 50) {
         div.style.left = `${x}px`;
         div.style.top = `${y}px`;
+        const index = div.dataset.index;
+        datos[index].top = y;
+        datos[index].left = x;
+        guardarFirestore(index);
       }
     });
 
@@ -174,30 +206,15 @@ function crearBloques() {
   actualizarFondo();
 }
 
-function alternarModo() {
-  modoEdicion = !modoEdicion;
-  botonModo.textContent = modoEdicion ? 'Bloquear edición' : 'Cambiar a modo edición';
-}
-
-function alternarUbicacion() {
-  ubicacionActual = ubicacionActual === 'taller' ? 'campa' : 'taller';
-  botonUbicacion.textContent = ubicacionActual === 'taller' ? 'Campa' : 'Taller';
-  crearBloques();
-}
-
-function actualizarFondo() {
-  plano.style.backgroundImage = `url('${ubicacionActual === 'taller' ? 'plano-fondo.png' : 'plano-campa.png'}')`;
-}
-
 function abrirModal(bloque) {
   bloqueActual = bloque;
   const index = bloque.dataset.index;
-  const info = datos[index];
-  actividadInput.value = info.actividad;
-  clienteInput.value = info.cliente;
-  trabajadorInput.value = info.trabajador;
-  matriculaInput.value = info.matricula;
-  marcaInput.value = info.marca;
+  const info = datos[index] || {};
+  actividadInput.value = info.actividad || '';
+  clienteInput.value = info.cliente || '';
+  trabajadorInput.value = info.trabajador || '';
+  matriculaInput.value = info.matricula || '';
+  marcaInput.value = info.marca || '';
   modal.style.display = 'flex';
 }
 
@@ -209,23 +226,31 @@ function guardarDatos() {
     trabajador: trabajadorInput.value,
     matricula: matriculaInput.value.toUpperCase(),
     marca: marcaInput.value.toUpperCase(),
-    ocupado: true
+    ocupado: true,
+    top: parseInt(bloqueActual.style.top),
+    left: parseInt(bloqueActual.style.left)
   };
   renderizarBloques();
+  guardarFirestore(index);
   modal.style.display = 'none';
 }
 
 function liberarDatos() {
   const index = bloqueActual.dataset.index;
-  datos[index] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
+  datos[index] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false, top: parseInt(bloqueActual.style.top), left: parseInt(bloqueActual.style.left)};
   renderizarBloques();
+  guardarFirestore(index);
   modal.style.display = 'none';
 }
 
 function renderizarBloques() {
   bloques.forEach((bloque) => {
     const i = parseInt(bloque.dataset.index);
-    const info = datos[i];
+    const info = datos[i] || {};
+    if (info.top && info.left) {
+      bloque.style.top = info.top + 'px';
+      bloque.style.left = info.left + 'px';
+    }
     if (info.ocupado) {
       bloque.style.backgroundColor = info.trabajador ? '#f00' : '#8f8';
       bloque.innerHTML = `<div class='numero'>${i + 1}</div>
@@ -237,10 +262,23 @@ function renderizarBloques() {
   });
 }
 
+function guardarFirestore(index) {
+  db.collection("bloques").doc(index.toString()).set(datos[index]);
+}
+
+function cargarDesdeFirestore() {
+  db.collection("bloques").get().then((querySnapshot) => {
+    querySnapshot.forEach((doc) => {
+      datos[doc.id] = doc.data();
+    });
+    crearBloques();
+  });
+}
+
 closeModal.onclick = () => modal.style.display = 'none';
 
-crearBloques();
-</script>
+// Inicia con datos desde Firebase
+cargarDesdeFirestore();
 
 </body>
 </html>
