@@ -103,7 +103,7 @@
 </div>
 
 <div id="mensajeEstado" style="position:fixed; bottom:10px; right:10px; background:#eee; padding:8px 12px; border-radius:6px; box-shadow: 0 0 4px rgba(0,0,0,0.3); font-size:14px; display:none;">Estado</div>
-<div style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-family:monospace; z-index:20;">Versión 1.2.3</div>
+<div style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-family:monospace; z-index:20;">Versión 1.2.4</div>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
@@ -160,14 +160,24 @@ function crearBloques() {
     div.className = 'bloque';
     const globalIndex = ubicacionActual === 'taller' ? i : i + 40;
     div.dataset.index = globalIndex;
-    const pos = posiciones[i];
+
     if (!datos[globalIndex]) datos[globalIndex] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
-    const topPct = (pos.top / plano.offsetHeight) * 100;
-    const leftPct = (pos.left / plano.offsetWidth) * 100;
-    datos[globalIndex].topPct = topPct;
-    datos[globalIndex].leftPct = leftPct;
-    div.style.top = topPct.toFixed(2) + '%';
-    div.style.left = leftPct.toFixed(2) + '%';
+    const info = datos[globalIndex];
+
+    if (info.topPct !== undefined && info.leftPct !== undefined) {
+      div.style.top = info.topPct.toFixed(2) + '%';
+      div.style.left = info.leftPct.toFixed(2) + '%';
+    } else {
+      const pos = posiciones[i];
+      const topPct = (pos.top / plano.offsetHeight) * 100;
+      const leftPct = (pos.left / plano.offsetWidth) * 100;
+      datos[globalIndex].topPct = topPct;
+      datos[globalIndex].leftPct = leftPct;
+      div.style.top = topPct.toFixed(2) + '%';
+      div.style.left = leftPct.toFixed(2) + '%';
+      db.collection('bloques').doc(globalIndex.toString()).set(datos[globalIndex], { merge: true });
+    }
+
     plano.appendChild(div);
     bloques.push(div);
 
@@ -186,14 +196,14 @@ function crearBloques() {
       div.style.cursor = 'grabbing';
     });
 
-    document.addEventListener('mousemove', (e) => {
+    div.addEventListener('mousemove', (e) => {
       if (!isDragging || !modoEdicion) return;
       const rect = plano.getBoundingClientRect();
       const x = e.clientX - rect.left - offsetX;
       const y = e.clientY - rect.top - offsetY;
       if (x >= 0 && y >= 0 && x <= plano.offsetWidth - 50 && y <= plano.offsetHeight - 50) {
-        div.style.left = `${x}px`;
-        div.style.top = `${y}px`;
+        div.style.left = `${(x / plano.offsetWidth) * 100}%`;
+        div.style.top = `${(y / plano.offsetHeight) * 100}%`;
       }
     });
 
