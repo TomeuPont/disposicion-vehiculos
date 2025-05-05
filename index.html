@@ -103,23 +103,13 @@
 </div>
 
 <div id="mensajeEstado" style="position:fixed; bottom:10px; right:10px; background:#eee; padding:8px 12px; border-radius:6px; box-shadow: 0 0 4px rgba(0,0,0,0.3); font-size:14px; display:none;">Estado</div>
-<div style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-family:monospace; z-index:20;">Versión 1.1.6</div>
+<div style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-family:monospace; z-index:20;">Versión 1.1.7</div>
 
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js">window.addEventListener('resize', () => {
-  bloques.forEach((bloque) => {
-    const i = parseInt(bloque.dataset.index);
-    const info = datos[i];
-    if (info.topPct !== undefined && info.leftPct !== undefined) {
-      bloque.style.top = info.topPct.toFixed(2) + '%';
-      bloque.style.left = info.leftPct.toFixed(2) + '%';
-    }
-  });
-});
-</script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 <script>
 const firebaseConfig = {
-  apiKey: "813627250056",
+  apiKey: "TU_API_KEY",
   authDomain: "planos-taller-campa.firebaseapp.com",
   projectId: "planos-taller-campa"
 };
@@ -172,24 +162,10 @@ function crearBloques() {
     div.dataset.index = globalIndex;
     const pos = posiciones[i];
     if (!datos[globalIndex]) datos[globalIndex] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
-    if (datos[globalIndex].topPct !== undefined && datos[globalIndex].leftPct !== undefined) {
-      div.style.top = datos[globalIndex].topPct.toFixed(2) + '%';
-      div.style.left = datos[globalIndex].leftPct.toFixed(2) + '%';
-    } else {
-      const topPct = (pos.top / plano.offsetHeight) * 100;
-      const leftPct = (pos.left / plano.offsetWidth) * 100;
-      datos[globalIndex].topPct = topPct;
-      datos[globalIndex].leftPct = leftPct;
-      db.collection('bloques').doc(globalIndex.toString()).set(datos[globalIndex], { merge: true });
-      div.style.top = topPct.toFixed(2) + '%';
-      div.style.left = leftPct.toFixed(2) + '%';
-    });
-      div.style.top = topPct.toFixed(2) + '%';
-      div.style.left = leftPct.toFixed(2) + '%';
-    }
+    div.style.top = pos.top + 'px';
+    div.style.left = pos.left + 'px';
     plano.appendChild(div);
     bloques.push(div);
-    if (!datos[globalIndex]) datos[globalIndex] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
 
     div.addEventListener('click', () => {
       if (!modoEdicion) abrirModal(div);
@@ -223,12 +199,8 @@ function crearBloques() {
         div.style.cursor = 'grab';
         const index = div.dataset.index;
         if (!datos[index]) datos[index] = {};
-        const topPercent = (parseInt(div.style.top) / plano.offsetHeight) * 100;
-        const leftPercent = (parseInt(div.style.left) / plano.offsetWidth) * 100;
         datos[index].top = parseInt(div.style.top);
         datos[index].left = parseInt(div.style.left);
-        datos[index].topPct = topPercent;
-        datos[index].leftPct = leftPercent;
         db.collection('bloques').doc(index).set(datos[index], { merge: true });
       }
     });
@@ -257,7 +229,9 @@ function guardarDatos() {
     trabajador: trabajadorInput.value,
     matricula: matriculaInput.value.toUpperCase(),
     marca: marcaInput.value.toUpperCase(),
-    ocupado: true
+    ocupado: true,
+    top: parseInt(bloqueActual.style.top),
+    left: parseInt(bloqueActual.style.left)
   };
   db.collection('bloques').doc(index).set(datos[index]);
   renderizarBloques();
@@ -276,6 +250,10 @@ function renderizarBloques() {
   bloques.forEach((bloque) => {
     const i = parseInt(bloque.dataset.index);
     const info = datos[i];
+    if (info.top !== undefined && info.left !== undefined) {
+      bloque.style.top = info.top + 'px';
+      bloque.style.left = info.left + 'px';
+    }
     if (info.ocupado) {
       bloque.style.backgroundColor = info.trabajador ? '#f00' : '#8f8';
       bloque.innerHTML = `<div class='numero'>${i + 1}</div><div style='font-size:8px;'>Act: ${info.actividad}<br>${info.cliente}</div>`;
