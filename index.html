@@ -103,7 +103,7 @@
 </div>
 
 <div id="mensajeEstado" style="position:fixed; bottom:10px; right:10px; background:#eee; padding:8px 12px; border-radius:6px; box-shadow: 0 0 4px rgba(0,0,0,0.3); font-size:14px; display:none;">Estado</div>
-<div style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-family:monospace; z-index:20;">Versión 1.1.7</div>
+<div style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-family:monospace; z-index:20;">Versión 1.1.8</div>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
@@ -133,8 +133,8 @@ const botonModo = document.getElementById('botonModo');
 const botonUbicacion = document.getElementById('btnUbicacion');
 const closeModal = document.getElementById('closeModal');
 
-const posicionesTaller = [...Array(30)].map((_, i) => ({top: 300 + (i % 5) * 60, left: 400 + Math.floor(i / 5) * 60}));
-const posicionesCampa = [...Array(30)].map((_, i) => ({top: 100 + (i % 5) * 60, left: 100 + Math.floor(i / 5) * 60}));
+const posicionesTaller = [...Array(40)].map((_, i) => ({top: 300 + (i % 5) * 60, left: 400 + Math.floor(i / 5) * 60}));
+const posicionesCampa = [...Array(40)].map((_, i) => ({top: 100 + (i % 5) * 60, left: 100 + Math.floor(i / 5) * 60}));
 
 function alternarUbicacion() {
   ubicacionActual = ubicacionActual === 'taller' ? 'campa' : 'taller';
@@ -155,7 +155,7 @@ function crearBloques() {
   plano.innerHTML = '';
   bloques = [];
   const posiciones = ubicacionActual === 'taller' ? posicionesTaller : posicionesCampa;
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 40; i++) {
     const div = document.createElement('div');
     div.className = 'bloque';
     const globalIndex = ubicacionActual === 'taller' ? i : i + 30;
