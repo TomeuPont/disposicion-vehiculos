@@ -103,7 +103,7 @@
 </div>
 
 <div id="mensajeEstado" style="position:fixed; bottom:10px; right:10px; background:#eee; padding:8px 12px; border-radius:6px; box-shadow: 0 0 4px rgba(0,0,0,0.3); font-size:14px; display:none;">Estado</div>
-<div style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-family:monospace; z-index:20;">Versión 1.1.10</div>
+<div style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-family:monospace; z-index:20;">Versión 1.2.0</div>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
@@ -162,8 +162,12 @@ function crearBloques() {
     div.dataset.index = globalIndex;
     const pos = posiciones[i];
     if (!datos[globalIndex]) datos[globalIndex] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
-    div.style.top = pos.top + 'px';
-    div.style.left = pos.left + 'px';
+    const topPct = (pos.top / plano.offsetHeight) * 100;
+    const leftPct = (pos.left / plano.offsetWidth) * 100;
+    datos[globalIndex].topPct = topPct;
+    datos[globalIndex].leftPct = leftPct;
+    div.style.top = topPct.toFixed(2) + '%';
+    div.style.left = leftPct.toFixed(2) + '%';
     plano.appendChild(div);
     bloques.push(div);
 
@@ -223,6 +227,8 @@ function abrirModal(bloque) {
 
 function guardarDatos() {
   const index = bloqueActual.dataset.index;
+  const topPct = (parseInt(bloqueActual.style.top) / plano.offsetHeight) * 100;
+  const leftPct = (parseInt(bloqueActual.style.left) / plano.offsetWidth) * 100;
   datos[index] = {
     actividad: actividadInput.value,
     cliente: clienteInput.value,
@@ -230,8 +236,8 @@ function guardarDatos() {
     matricula: matriculaInput.value.toUpperCase(),
     marca: marcaInput.value.toUpperCase(),
     ocupado: true,
-    top: parseInt(bloqueActual.style.top),
-    left: parseInt(bloqueActual.style.left)
+    topPct: topPct,
+    leftPct: leftPct
   };
   db.collection('bloques').doc(index).set(datos[index]);
   renderizarBloques();
@@ -240,7 +246,7 @@ function guardarDatos() {
 
 function liberarDatos() {
   const index = bloqueActual.dataset.index;
-  datos[index] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
+  datos[index] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false, topPct: undefined, leftPct: undefined};
   db.collection('bloques').doc(index).set(datos[index]);
   renderizarBloques();
   modal.style.display = 'none';
@@ -250,9 +256,9 @@ function renderizarBloques() {
   bloques.forEach((bloque) => {
     const i = parseInt(bloque.dataset.index);
     const info = datos[i];
-    if (info.top !== undefined && info.left !== undefined) {
-      bloque.style.top = info.top + 'px';
-      bloque.style.left = info.left + 'px';
+    if (info.topPct !== undefined && info.leftPct !== undefined) {
+      bloque.style.top = info.topPct.toFixed(2) + '%';
+      bloque.style.left = info.leftPct.toFixed(2) + '%';
     }
     if (info.ocupado) {
       bloque.style.backgroundColor = info.trabajador ? '#f00' : '#8f8';
