@@ -222,8 +222,8 @@ function abrirModal(bloque) {
 
 function guardarDatos() {
   const index = bloqueActual.dataset.index;
-  const topPct = (parseInt(bloqueActual.style.top) / plano.offsetHeight) * 100;
-  const leftPct = (parseInt(bloqueActual.style.left) / plano.offsetWidth) * 100;
+  const topPct = (parseFloat(bloqueActual.style.top) / plano.offsetHeight) * 100;
+  const leftPct = (parseFloat(bloqueActual.style.left) / plano.offsetWidth) * 100;
   datos[index] = {
     actividad: actividadInput.value,
     cliente: clienteInput.value,
