@@ -49,6 +49,10 @@
       box-sizing: border-box;
       line-height: 1.2;
     }
+    .bloque .numero {
+      font-weight: bold;
+      font-size: 16px;
+    }
     .modal {
       display: none;
       position: fixed;
@@ -98,9 +102,12 @@
   </div>
 </div>
 
-<div style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-family:monospace; z-index:20;">Versión 1.3.6</div>
+<div id="mensajeEstado" style="position:fixed; bottom:10px; right:10px; background:#eee; padding:8px 12px; border-radius:6px; box-shadow: 0 0 4px rgba(0,0,0,0.3); font-size:14px; display:none;">Estado</div>
+<div style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-family:monospace; z-index:20;">Versión 1.3.7</div>
+
 
 <script>
+
 let bloques = [];
 let datos = {};
 let modoEdicion = false;
@@ -124,7 +131,7 @@ const posicionesCampa = [...Array(40)].map((_, i) => ({top: 100 + (i % 5) * 60, 
 function alternarUbicacion() {
   ubicacionActual = ubicacionActual === 'taller' ? 'campa' : 'taller';
   botonUbicacion.textContent = ubicacionActual === 'taller' ? 'Campa' : 'Taller';
-  crearBloques();
+  actualizarFondo();
 }
 
 function alternarModo() {
@@ -133,40 +140,40 @@ function alternarModo() {
 }
 
 function actualizarFondo() {
-  plano.style.backgroundImage = `url('${ubicacionActual === 'taller' ? 'plano-fondo.png' : 'plano-campa.png'}')`;
+  const img = new Image();
+  img.onload = () => {
+    plano.style.backgroundImage = `url('${img.src}')`;
+    crearBloques();
+  };
+  img.src = ubicacionActual === 'taller' ? 'plano-fondo.png' : 'plano-campa.png';
+}')`;
 }
 
 function crearBloques() {
   plano.innerHTML = '';
   bloques = [];
   const posiciones = ubicacionActual === 'taller' ? posicionesTaller : posicionesCampa;
-
   for (let i = 0; i < 40; i++) {
     const div = document.createElement('div');
     div.className = 'bloque';
     const globalIndex = ubicacionActual === 'taller' ? i : i + 40;
     div.dataset.index = globalIndex;
 
-    // Si no existe aún, lo inicializamos con posición relativa
-    if (!datos[globalIndex]) {
+    if (!datos[globalIndex]) datos[globalIndex] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
+    const info = datos[globalIndex];
+
+    if (info.topPct !== undefined && info.leftPct !== undefined) {
+      div.style.top = info.topPct.toFixed(2) + '%';
+      div.style.left = info.leftPct.toFixed(2) + '%';
+    } else {
       const pos = posiciones[i];
       const topPct = (pos.top / plano.offsetHeight) * 100;
       const leftPct = (pos.left / plano.offsetWidth) * 100;
-      datos[globalIndex] = {
-        actividad: '',
-        cliente: '',
-        trabajador: '',
-        matricula: '',
-        marca: '',
-        ocupado: false,
-        topPct: topPct,
-        leftPct: leftPct
-      };
+      datos[globalIndex].topPct = topPct;
+      datos[globalIndex].leftPct = leftPct;
+      div.style.top = topPct.toFixed(2) + '%';
+      div.style.left = leftPct.toFixed(2) + '%';
     }
-
-    const info = datos[globalIndex];
-    div.style.top = info.topPct.toFixed(2) + '%';
-    div.style.left = info.leftPct.toFixed(2) + '%';
 
     plano.appendChild(div);
     bloques.push(div);
@@ -209,7 +216,53 @@ function crearBloques() {
       }
     });
   }
+  renderizarBloques();
+  actualizarFondo();
+}
+    bloques.push(div);
 
+    div.addEventListener('click', () => {
+      if (!modoEdicion) abrirModal(div);
+    });
+
+    let isDragging = false;
+    let offsetX, offsetY;
+
+    div.addEventListener('mousedown', (e) => {
+      if (!modoEdicion) return;
+      isDragging = true;
+      offsetX = e.offsetX;
+      offsetY = e.offsetY;
+      div.style.cursor = 'grabbing';
+    });
+
+    div.addEventListener('mousemove', (e) => {
+      if (!isDragging || !modoEdicion) return;
+      const rect = plano.getBoundingClientRect();
+      const x = e.clientX - rect.left - offsetX;
+      const y = e.clientY - rect.top - offsetY;
+      if (x >= 0 && y >= 0 && x <= plano.offsetWidth - 50 && y <= plano.offsetHeight - 50) {
+        div.style.left = `${(x / plano.offsetWidth) * 100}%`;
+        div.style.top = `${(y / plano.offsetHeight) * 100}%`;
+      }
+    });
+
+    div.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        div.style.cursor = 'grab';
+        const index = div.dataset.index;
+        if (!datos[index]) datos[index] = {};
+        const topPct = (parseInt(div.style.top) / plano.offsetHeight) * 100;
+        const leftPct = (parseInt(div.style.left) / plano.offsetWidth) * 100;
+        datos[index].topPct = topPct;
+        datos[index].leftPct = leftPct;
+        
+      }
+    });
+      }
+    });
+  }
   renderizarBloques();
   actualizarFondo();
 }
@@ -228,8 +281,8 @@ function abrirModal(bloque) {
 
 function guardarDatos() {
   const index = bloqueActual.dataset.index;
-  const topPct = (parseFloat(bloqueActual.style.top) / plano.offsetHeight) * 100;
-  const leftPct = (parseFloat(bloqueActual.style.left) / plano.offsetWidth) * 100;
+  const topPct = (parseInt(bloqueActual.style.top) / plano.offsetHeight) * 100;
+  const leftPct = (parseInt(bloqueActual.style.left) / plano.offsetWidth) * 100;
   datos[index] = {
     actividad: actividadInput.value,
     cliente: clienteInput.value,
@@ -240,6 +293,7 @@ function guardarDatos() {
     topPct: topPct,
     leftPct: leftPct
   };
+  
   renderizarBloques();
   modal.style.display = 'none';
 }
@@ -247,6 +301,7 @@ function guardarDatos() {
 function liberarDatos() {
   const index = bloqueActual.dataset.index;
   datos[index] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
+  db.collection('bloques').doc(index).set(datos[index]);
   renderizarBloques();
   modal.style.display = 'none';
 }
@@ -255,24 +310,29 @@ function renderizarBloques() {
   bloques.forEach((bloque) => {
     const i = parseInt(bloque.dataset.index);
     const info = datos[i];
-
-    // No volver a aplicar posición aquí
-
+    if (info.topPct !== undefined && info.leftPct !== undefined) {
+      bloque.style.top = info.topPct.toFixed(2) + '%';
+      bloque.style.left = info.leftPct.toFixed(2) + '%';
+    }
     if (info.ocupado) {
       bloque.style.backgroundColor = info.trabajador ? '#f00' : '#8f8';
       bloque.innerHTML = `<div style='font-size:14px; font-weight:bold;'>${info.actividad}</div>`;
     } else {
       bloque.style.backgroundColor = '#ccc';
-      // No borres el innerHTML ni muevas el bloque si está vacío
-      if (!bloque.innerHTML) {
-        bloque.innerHTML = ``;
-      }
+      bloque.innerHTML = ``;
     }
   });
 }
 
-document.getElementById('closeModal').onclick = () => modal.style.display = 'none';
-window.onload = () => crearBloques();
+function cargarDesdeFirestore() {
+  crearBloques();
+});
+    crearBloques();
+  });
+}
+
+closeModal.onclick = () => modal.style.display = 'none';
+cargarDesdeFirestore();
 </script>
 </body>
 </html>
