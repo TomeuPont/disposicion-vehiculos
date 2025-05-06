@@ -191,17 +191,27 @@ function crearBloques() {
       }
     });
 
-    div.addEventListener('mouseup', () => {
-      if (isDragging) {
-        isDragging = false;
-        div.style.cursor = 'grab';
-        const index = div.dataset.index;
-        const topPct = (parseFloat(div.style.top) / plano.offsetHeight) * 100;
-        const leftPct = (parseFloat(div.style.left) / plano.offsetWidth) * 100;
-        datos[index].topPct = topPct;
-        datos[index].leftPct = leftPct;
-      }
-    });
+  div.addEventListener('mouseup', () => {
+  if (isDragging) {
+    isDragging = false;
+    div.style.cursor = 'grab';
+    const index = div.dataset.index;
+    if (!datos[index]) {
+      datos[index] = {
+        actividad: '',
+        cliente: '',
+        trabajador: '',
+        matricula: '',
+        marca: '',
+        ocupado: false
+      };
+    }
+    const topPct = (parseFloat(div.style.top) / plano.offsetHeight) * 100;
+    const leftPct = (parseFloat(div.style.left) / plano.offsetWidth) * 100;
+    datos[index].topPct = topPct;
+    datos[index].leftPct = leftPct;
+  }
+});
   }
 
   renderizarBloques();
