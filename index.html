@@ -49,10 +49,6 @@
       box-sizing: border-box;
       line-height: 1.2;
     }
-    .bloque .numero {
-      font-weight: bold;
-      font-size: 16px;
-    }
     .modal {
       display: none;
       position: fixed;
@@ -102,12 +98,9 @@
   </div>
 </div>
 
-<div id="mensajeEstado" style="position:fixed; bottom:10px; right:10px; background:#eee; padding:8px 12px; border-radius:6px; box-shadow: 0 0 4px rgba(0,0,0,0.3); font-size:14px; display:none;">Estado</div>
-<div style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-family:monospace; z-index:20;">Versión 1.3.0</div>
-
+<div style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-family:monospace; z-index:20;">Versión 1.3.1</div>
 
 <script>
-
 let bloques = [];
 let datos = {};
 let modoEdicion = false;
@@ -131,7 +124,7 @@ const posicionesCampa = [...Array(40)].map((_, i) => ({top: 100 + (i % 5) * 60, 
 function alternarUbicacion() {
   ubicacionActual = ubicacionActual === 'taller' ? 'campa' : 'taller';
   botonUbicacion.textContent = ubicacionActual === 'taller' ? 'Campa' : 'Taller';
-  cargarDesdeFirestore();
+  crearBloques();
 }
 
 function alternarModo() {
@@ -154,8 +147,8 @@ function crearBloques() {
     div.dataset.index = globalIndex;
 
     if (!datos[globalIndex]) datos[globalIndex] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
-    const info = datos[globalIndex];
 
+    const info = datos[globalIndex];
     if (info.topPct !== undefined && info.leftPct !== undefined) {
       div.style.top = info.topPct.toFixed(2) + '%';
       div.style.left = info.leftPct.toFixed(2) + '%';
@@ -167,7 +160,6 @@ function crearBloques() {
       datos[globalIndex].leftPct = leftPct;
       div.style.top = topPct.toFixed(2) + '%';
       div.style.left = leftPct.toFixed(2) + '%';
-      
     }
 
     plano.appendChild(div);
@@ -204,17 +196,14 @@ function crearBloques() {
         isDragging = false;
         div.style.cursor = 'grab';
         const index = div.dataset.index;
-        if (!datos[index]) datos[index] = {};
-        const topPct = (parseInt(div.style.top) / plano.offsetHeight) * 100;
-        const leftPct = (parseInt(div.style.left) / plano.offsetWidth) * 100;
+        const topPct = (parseFloat(div.style.top) / plano.offsetHeight) * 100;
+        const leftPct = (parseFloat(div.style.left) / plano.offsetWidth) * 100;
         datos[index].topPct = topPct;
         datos[index].leftPct = leftPct;
-        
-      }
-    });
       }
     });
   }
+
   renderizarBloques();
   actualizarFondo();
 }
@@ -245,7 +234,6 @@ function guardarDatos() {
     topPct: topPct,
     leftPct: leftPct
   };
-  db.collection('bloques').doc(index).set(datos[index]);
   renderizarBloques();
   modal.style.display = 'none';
 }
@@ -253,7 +241,6 @@ function guardarDatos() {
 function liberarDatos() {
   const index = bloqueActual.dataset.index;
   datos[index] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
-  db.collection('bloques').doc(index).set(datos[index]);
   renderizarBloques();
   modal.style.display = 'none';
 }
@@ -276,15 +263,8 @@ function renderizarBloques() {
   });
 }
 
-function cargarDesdeFirestore() {
-  crearBloques();
-    });
-    crearBloques();
-  });
-}
-
-closeModal.onclick = () => modal.style.display = 'none';
-cargarDesdeFirestore();
+document.getElementById('closeModal').onclick = () => modal.style.display = 'none';
+window.onload = () => crearBloques();
 </script>
 </body>
 </html>
