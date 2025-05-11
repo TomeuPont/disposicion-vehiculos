@@ -103,7 +103,7 @@
 </div>
 
 <div id="mensajeEstado" style="position:fixed; bottom:10px; right:10px; background:#eee; padding:8px 12px; border-radius:6px; box-shadow: 0 0 4px rgba(0,0,0,0.3); font-size:14px; display:none;">Estado</div>
-<div style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-family:monospace; z-index:20;">Versión 1.4.2</div>
+<div style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-family:monospace; z-index:20;">Versión 1.4.3</div>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
@@ -227,8 +227,11 @@ function abrirModal(bloque) {
 
 function guardarDatos() {
   const index = bloqueActual.dataset.index;
-  const topPct = (parseFloat(bloqueActual.style.top) / plano.offsetHeight) * 100;
-  const leftPct = (parseFloat(bloqueActual.style.left) / plano.offsetWidth) * 100;
+  const rect = plano.getBoundingClientRect();
+  const topPx = bloqueActual.getBoundingClientRect().top - rect.top;
+  const leftPx = bloqueActual.getBoundingClientRect().left - rect.left;
+  const topPct = (topPx / plano.offsetHeight) * 100;
+  const leftPct = (leftPx / plano.offsetWidth) * 100;
   datos[index] = {
     actividad: actividadInput.value,
     cliente: clienteInput.value,
