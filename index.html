@@ -103,7 +103,7 @@
 </div>
 
 <div id="mensajeEstado" style="position:fixed; bottom:10px; right:10px; background:#eee; padding:8px 12px; border-radius:6px; box-shadow: 0 0 4px rgba(0,0,0,0.3); font-size:14px; display:none;">Estado</div>
-<div style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-family:monospace; z-index:20;">Versión 1.4.3</div>
+<div style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-family:monospace; z-index:20;">Versión 1.4.4</div>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
@@ -175,37 +175,41 @@ function crearBloques() {
 
     let isDragging = false;
     let offsetX, offsetY;
+    let bloqueActivo = null;
 
     div.addEventListener('mousedown', (e) => {
       if (!modoEdicion) return;
       isDragging = true;
+      bloqueActivo = div;
       offsetX = e.offsetX;
       offsetY = e.offsetY;
       div.style.cursor = 'grabbing';
     });
 
-    div.addEventListener('mousemove', (e) => {
-      if (!isDragging || !modoEdicion) return;
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging || !modoEdicion || !bloqueActivo) return;
       const rect = plano.getBoundingClientRect();
       const x = e.clientX - rect.left - offsetX;
       const y = e.clientY - rect.top - offsetY;
-      if (x >= 0 && y >= 0 && x <= plano.offsetWidth - 50 && y <= plano.offsetHeight - 50) {
-        div.style.left = `${x}px`;
-        div.style.top = `${y}px`;
+      if (x >= 0 && y >= 0 && x <= plano.offsetWidth - bloqueActivo.offsetWidth && y <= plano.offsetHeight - bloqueActivo.offsetHeight) {
+        bloqueActivo.style.left = `${(x / plano.offsetWidth) * 100}%`;
+        bloqueActivo.style.top = `${(y / plano.offsetHeight) * 100}%`;
       }
     });
 
-    div.addEventListener('mouseup', () => {
-      if (isDragging) {
+    document.addEventListener('mouseup', () => {
+      if (isDragging && bloqueActivo) {
         isDragging = false;
-        div.style.cursor = 'grab';
-        const index = div.dataset.index;
-        if (!datos[index]) datos[index] = {};
-        const topPct = (parseInt(div.style.top) / plano.offsetHeight) * 100;
-      const leftPct = (parseInt(div.style.left) / plano.offsetWidth) * 100;
-      datos[index].topPct = topPct;
-      datos[index].leftPct = leftPct;
-      db.collection('bloques').doc(index).set(datos[index]);
+        bloqueActivo.style.cursor = 'grab';
+        const index = bloqueActivo.dataset.index;
+        const topPx = bloqueActivo.getBoundingClientRect().top - plano.getBoundingClientRect().top;
+        const leftPx = bloqueActivo.getBoundingClientRect().left - plano.getBoundingClientRect().left;
+        const topPct = (topPx / plano.offsetHeight) * 100;
+        const leftPct = (leftPx / plano.offsetWidth) * 100;
+        datos[index].topPct = topPct;
+        datos[index].leftPct = leftPct;
+        db.collection('bloques').doc(index).set(datos[index]);
+        bloqueActivo = null;
       }
     });
   }
