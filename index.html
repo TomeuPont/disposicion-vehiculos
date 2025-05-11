@@ -84,7 +84,11 @@
 
 <div class="panel-lateral">
   <button onclick="alternarUbicacion()" id="btnUbicacion">Campa</button>
-  <button onclick="alternarModo()" id="botonModo">Cambiar a modo edición</button>
+  <button onclick="mostrarConfiguracion()" id="botonConfiguracion">⚙️ Configuración</button>
+<div id="menuConfiguracion" style="display:none; position:absolute; top:40px; left:10px; background:#fff; border:1px solid #ccc; padding:10px; border-radius:6px; box-shadow:0 0 6px rgba(0,0,0,0.2);">
+  <button onclick="alternarModo()">Activar modo edición</button><br><br>
+  <button onclick="confirmarReseteo()">Resetear todos los bloques</button>
+</div>
 </div>
 <div class="plano-container" id="plano"></div>
 
@@ -103,9 +107,29 @@
 </div>
 
 <div id="mensajeEstado" style="position:fixed; bottom:10px; right:10px; background:#eee; padding:8px 12px; border-radius:6px; box-shadow: 0 0 4px rgba(0,0,0,0.3); font-size:14px; display:none;">Estado</div>
-<div style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-family:monospace; z-index:20;">Versión 1.4.6</div>
+<div style="position:fixed; top:10px; right:10px; background:#222; color:#fff; padding:4px 10px; border-radius:4px; font-size:12px; font-family:monospace; z-index:20;">Versión 1.4.7</div>
 
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js">function mostrarConfiguracion() {
+  const menu = document.getElementById('menuConfiguracion');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+function confirmarReseteo() {
+  const pass = prompt('Introduce la contraseña para resetear todos los bloques:');
+  if (pass === 'patata') {
+    if (confirm('¿Estás seguro de que quieres resetear todos los bloques? Esta acción no se puede deshacer.')) {
+      datos = {};
+      for (let i = 0; i < 80; i++) {
+        datos[i] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
+        db.collection('bloques').doc(i.toString()).set(datos[i]);
+      }
+      crearBloques();
+    }
+  } else {
+    alert('Contraseña incorrecta.');
+  }
+}
+</script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 <script>
 const firebaseConfig = {
