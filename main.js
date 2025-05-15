@@ -140,6 +140,8 @@ function crearBloques() {
 }
 
 function actualizarFondo() {
+  plano.classList.remove('taller', 'campa');
+  plano.classList.add(ubicacionActual);
   plano.style.backgroundImage = `url('${ubicacionActual === 'taller' ? 'plano-fondo.png' : 'plano-campa.png'}')`;
 }
 
