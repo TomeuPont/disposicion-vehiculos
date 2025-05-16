@@ -19,7 +19,6 @@ const clienteInput = document.getElementById('cliente');
 const trabajadorInput = document.getElementById('trabajador');
 const matriculaInput = document.getElementById('matricula');
 const marcaInput = document.getElementById('marca');
-const terminadoInput = document.getElementById('terminado');
 const botonUbicacion = document.getElementById('btnUbicacion');
 const closeModal = document.getElementById('closeModal');
 
@@ -156,7 +155,6 @@ function abrirModal(bloque) {
   matriculaInput.value = info.matricula;
   marcaInput.value = info.marca;
   modal.style.display = 'flex';
-  terminadoInput.checked = info.terminado || false;
 }
 
 function guardarDatos() {
@@ -213,7 +211,6 @@ function guardarDatos() {
   db.collection('bloques').doc(index).set(datos[index]);
   renderizarBloques();
   modal.style.display = 'none';
-  terminado: terminadoInput.checked,
 }
 
 function liberarDatos() {
@@ -235,9 +232,6 @@ function renderizarBloques() {
     if (info.ocupado) {
       bloque.style.backgroundColor = info.trabajador ? '#f00' : '#8f8';
       bloque.innerHTML = `<div style='font-size:14px; font-weight:bold;'>${info.actividad}</div>`;
-      bloque.style.backgroundColor = info.terminado
-  ? '#ff0'
-  : (info.trabajador ? '#f00' : '#8f8');
     } else {
       bloque.style.backgroundColor = '#ccc';
       bloque.innerHTML = ``;
