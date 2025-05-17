@@ -160,34 +160,74 @@ function abrirModal(bloque) {
 function guardarDatos() {
   const nuevaActividad = parseInt(actividadInput.value);
   if (isNaN(nuevaActividad)) {
-    alert("La actividad debe ser un número.");
+    alert("La actividad debe ser un número válido.");
     return;
   }
+
+  const indexActual = bloqueActual.dataset.index;
   
-  const index = bloqueActual.dataset.index;
+  // Buscar si ya existe esta actividad en otro bloque
+  let bloqueExistente = null;
+  let ubicacionExistente = '';
+  
+  for (let id in datos) {
+    if (id !== indexActual && datos[id].actividad && parseInt(datos[id].actividad) === nuevaActividad) {
+      bloqueExistente = id;
+      ubicacionExistente = id < 40 ? 'el Taller' : 'la Campa';
+      break;
+    }
+  }
+
+  if (bloqueExistente !== null) {
+    const mensaje = `¡El número de actividad ${nuevaActividad} ya existe en ${ubicacionExistente} (Bloque ${parseInt(bloqueExistente)+1}).`;
+    
+    // Mostrar mensaje en el div de estado
+    const mensajeEstado = document.getElementById('mensajeEstado');
+    mensajeEstado.textContent = mensaje;
+    mensajeEstado.style.display = 'block';
+    mensajeEstado.style.backgroundColor = '#ffcccc';
+    
+    // Ocultar después de 5 segundos
+    setTimeout(() => {
+      mensajeEstado.style.display = 'none';
+    }, 5000);
+    
+    return; // No permitir guardar
+  }
+
+  // Continuar con el guardado normal si no hay duplicados
   const rect = plano.getBoundingClientRect();
   const topPx = bloqueActual.getBoundingClientRect().top - rect.top;
   const leftPx = bloqueActual.getBoundingClientRect().left - rect.left;
   const topPct = (topPx / plano.offsetHeight) * 100;
   const leftPct = (leftPx / plano.offsetWidth) * 100;
   
-  datos[index] = {
+  datos[indexActual] = {
     actividad: actividadInput.value,
     cliente: clienteInput.value,
     trabajador: trabajadorInput.value,
     matricula: matriculaInput.value.toUpperCase(),
     marca: marcaInput.value.toUpperCase(),
-    terminado: terminadoInput.checked,  // Añadir esta línea
+    terminado: terminadoInput.checked,
     ocupado: true,
     topPct: topPct,
     leftPct: leftPct
   };
   
-  db.collection('bloques').doc(index).set(datos[index]);
+  db.collection('bloques').doc(indexActual).set(datos[indexActual]);
   renderizarBloques();
   modal.style.display = 'none';
-}
-function liberarDatos() {
+  
+  // Mostrar mensaje de éxito
+  const mensajeEstado = document.getElementById('mensajeEstado');
+  mensajeEstado.textContent = `Actividad ${nuevaActividad} guardada correctamente.`;
+  mensajeEstado.style.display = 'block';
+  mensajeEstado.style.backgroundColor = '#ccffcc';
+  
+  setTimeout(() => {
+    mensajeEstado.style.display = 'none';
+  }, 3000);
+}function liberarDatos() {
   const index = bloqueActual.dataset.index;
   datos[index] = {
     actividad: '', 
