@@ -1,258 +1,251 @@
-// ========================
-// CONFIGURACIÓN FIREBASE
-// ========================
 const firebaseConfig = {
-  // Pon aquí tus datos de configuración
+  apiKey: "AIzaSyCQ_bC88QCFloRDHDVPP__9elcmW51pDqk",
+  authDomain: "planos-taller-campa.firebaseapp.com",
+  projectId: "planos-taller-campa"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ========================
-// VARIABLES GLOBALES
-// ========================
 let bloques = [];
-let bloqueActual = null;
-let ubicacion = 'taller'; // 'taller' o 'campa'
+let datos = {};
 let modoEdicion = false;
-let arrastrando = null;
-let offsetX = 0, offsetY = 0;
+let bloqueActual;
+let ubicacionActual = 'taller';
 
-// ========================
-// CARGA INICIAL
-// ========================
-window.onload = () => {
-  cargarBloques();
-  document.getElementById('closeModal').onclick = cerrarModal;
-  document.getElementById('btnUbicacion').onclick = alternarUbicacion;
-  document.getElementById('botonConfiguracion').onclick = mostrarConfiguracion;
-  document.addEventListener('mousedown', iniciarArrastre);
-  document.addEventListener('mousemove', moverArrastre);
-  document.addEventListener('mouseup', terminarArrastre);
-};
+const plano = document.getElementById('plano');
+const modal = document.getElementById('modal');
+const actividadInput = document.getElementById('actividad');
+const clienteInput = document.getElementById('cliente');
+const trabajadorInput = document.getElementById('trabajador');
+const matriculaInput = document.getElementById('matricula');
+const marcaInput = document.getElementById('marca');
+const terminadoInput = document.getElementById('terminado');
+const botonUbicacion = document.getElementById('btnUbicacion');
+const closeModal = document.getElementById('closeModal');
 
-// ========================
-// RENDERIZADO DE BLOQUES
-// ========================
-function cargarBloques() {
-  db.collection(ubicacion).get().then((querySnapshot) => {
-    bloques = [];
-    querySnapshot.forEach((doc) => {
-      let bloque = doc.data();
-      bloque.id = doc.id;
-      bloques.push(bloque);
-    });
-    renderizarBloques();
-  });
-}
+const posicionesTaller = [...Array(40)].map((_, i) => ({top: 300 + (i % 5) * 60, left: 400 + Math.floor(i / 5) * 60}));
+const posicionesCampa = [...Array(40)].map((_, i) => ({top: 100 + (i % 5) * 60, left: 100 + Math.floor(i / 5) * 60}));
 
-function renderizarBloques() {
-  const plano = document.getElementById('plano');
-  plano.innerHTML = '';
-  bloques.forEach(bloque => {
-    const bloqueDiv = document.createElement('div');
-    bloqueDiv.className = 'bloque';
-    bloqueDiv.id = 'bloque-' + bloque.id;
-
-    // Posición y tamaño relativos
-    bloqueDiv.style.left = (bloque.x || 0) + '%';
-    bloqueDiv.style.top = (bloque.y || 0) + '%';
-    if (bloque.width) bloqueDiv.style.width = bloque.width;
-    if (bloque.height) bloqueDiv.style.height = bloque.height;
-
-    // Estado terminado: color amarillo
-    if (bloque.terminado) {
-      bloqueDiv.classList.add('terminado');
-    }
-
-    // Contenido
-    bloqueDiv.innerHTML = `
-      <strong>${bloque.actividad || ''}</strong>
-      <span>${bloque.matricula || ''}</span>
-      <span>${bloque.marca || ''}</span>
-      <span>${bloque.cliente || ''}</span>
-    `;
-
-    // Permitir arrastrar si está en modo edición
-    if (modoEdicion) {
-      bloqueDiv.style.cursor = 'grab';
-      bloqueDiv.onmousedown = (e) => {
-        if (e.button !== 0) return;
-        arrastrando = bloqueDiv;
-        offsetX = e.offsetX;
-        offsetY = e.offsetY;
-        arrastrando.dataset.id = bloque.id;
-      };
-    } else {
-      bloqueDiv.style.cursor = 'pointer';
-      bloqueDiv.onmousedown = null;
-    }
-
-    // Click para editar solo fuera de modo edición
-    bloqueDiv.onclick = (e) => {
-      if (!modoEdicion && e.button === 0) abrirModal(bloque);
-    };
-
-    plano.appendChild(bloqueDiv);
-  });
-}
-
-// ========================
-// MODAL DE EDICIÓN
-// ========================
-function abrirModal(bloque) {
-  bloqueActual = { ...bloque }; // Copia para edición
-  document.getElementById('actividad').value = bloque.actividad || '';
-  document.getElementById('matricula').value = bloque.matricula || '';
-  document.getElementById('marca').value = bloque.marca || '';
-  document.getElementById('cliente').value = bloque.cliente || '';
-  document.getElementById('trabajador').value = bloque.trabajador || '';
-  document.getElementById('terminado').checked = !!bloque.terminado;
-  document.getElementById('modal').style.display = 'flex';
-}
-
-function cerrarModal() {
-  document.getElementById('modal').style.display = 'none';
-}
-
-// ========================
-// GUARDAR / LIBERAR DATOS
-// ========================
-function guardarDatos() {
-  const actividad = document.getElementById('actividad').value;
-  const matricula = document.getElementById('matricula').value;
-  const marca = document.getElementById('marca').value;
-  const cliente = document.getElementById('cliente').value;
-  const trabajador = document.getElementById('trabajador').value;
-  const terminado = document.getElementById('terminado').checked;
-
-  bloqueActual.actividad = actividad;
-  bloqueActual.matricula = matricula;
-  bloqueActual.marca = marca;
-  bloqueActual.cliente = cliente;
-  bloqueActual.trabajador = trabajador;
-  bloqueActual.terminado = terminado;
-
-  db.collection(ubicacion).doc(bloqueActual.id).set(bloqueActual).then(() => {
-    mostrarMensaje('Bloque actualizado');
-    cargarBloques();
-    cerrarModal();
-  });
-}
-
-function liberarDatos() {
-  if (!bloqueActual.id) return;
-  db.collection(ubicacion).doc(bloqueActual.id).delete().then(() => {
-    mostrarMensaje('Bloque liberado');
-    cargarBloques();
-    cerrarModal();
-  });
-}
-
-// ========================
-// DRAG & DROP DE BLOQUES
-// ========================
-function iniciarArrastre(e) {
-  if (!modoEdicion || !e.target.classList.contains('bloque')) return;
-  arrastrando = e.target;
-  offsetX = e.offsetX;
-  offsetY = e.offsetY;
-  arrastrando.style.zIndex = 2000;
-}
-
-function moverArrastre(e) {
-  if (!modoEdicion || !arrastrando) return;
-  const plano = document.getElementById('plano');
-  const rect = plano.getBoundingClientRect();
-  let x = ((e.clientX - rect.left - offsetX) / rect.width) * 100;
-  let y = ((e.clientY - rect.top - offsetY) / rect.height) * 100;
-  x = Math.max(0, Math.min(100, x));
-  y = Math.max(0, Math.min(100, y));
-  arrastrando.style.left = x + '%';
-  arrastrando.style.top = y + '%';
-}
-
-function terminarArrastre(e) {
-  if (!modoEdicion || !arrastrando) return;
-  const id = arrastrando.dataset.id;
-  const plano = document.getElementById('plano');
-  const rect = plano.getBoundingClientRect();
-  let x = ((e.clientX - rect.left - offsetX) / rect.width) * 100;
-  let y = ((e.clientY - rect.top - offsetY) / rect.height) * 100;
-  x = Math.max(0, Math.min(100, x));
-  y = Math.max(0, Math.min(100, y));
-  // Actualiza la posición en Firestore
-  db.collection(ubicacion).doc(id).update({ x, y }).then(() => {
-    cargarBloques();
-  });
-  arrastrando.style.zIndex = 1;
-  arrastrando = null;
-}
-
-// ========================
-// MENSAJES DE ESTADO
-// ========================
-function mostrarMensaje(msg) {
-  const msgDiv = document.getElementById('mensajeEstado');
-  msgDiv.innerText = msg;
-  msgDiv.style.display = 'block';
-  setTimeout(() => msgDiv.style.display = 'none', 2000);
-}
-
-// ========================
-// UBICACIÓN: TALLER / CAMPA
-// ========================
 function alternarUbicacion() {
-  ubicacion = (ubicacion === 'taller') ? 'campa' : 'taller';
-  document.getElementById('btnUbicacion').innerText = (ubicacion === 'taller') ? 'Campa' : 'Taller';
-  cargarBloques();
+  ubicacionActual = ubicacionActual === 'taller' ? 'campa' : 'taller';
+  botonUbicacion.textContent = ubicacionActual === 'taller' ? 'Campa' : 'Taller';
+  crearBloques();
 }
 
-// ========================
-// MODO EDICIÓN
-// ========================
 function alternarModo() {
   modoEdicion = !modoEdicion;
-  document.querySelector('#menuConfiguracion button').innerText = modoEdicion ? 'Desactivar modo edición' : 'Activar modo edición';
-  renderizarBloques();
-  mostrarMensaje(modoEdicion ? 'Modo edición activado' : 'Modo edición desactivado');
-}
-
-// ========================
-// RESET DE BLOQUES
-// ========================
-function confirmarReseteo() {
-  const pass = prompt('Introduce la contraseña para resetear (pista: patata)');
-  if (pass === 'patata') {
-    resetearBloques();
-  } else if (pass !== null) {
-    mostrarMensaje('Contraseña incorrecta');
+  const btn = document.querySelector('#menuConfiguracion button');
+  if (btn) {
+    btn.textContent = modoEdicion ? 'Bloquear edición' : 'Activar modo edición';
   }
 }
 
-function resetearBloques() {
-  // Puedes personalizar la lógica para moverlos a una esquina y limpiar sus datos
-  const promises = bloques.map(bloque => {
-    return db.collection(ubicacion).doc(bloque.id).update({
-      x: 95, y: 95,
-      actividad: '',
-      matricula: '',
-      marca: '',
-      cliente: '',
-      trabajador: '',
-      terminado: false
+function confirmarReseteo() {
+  const pass = prompt('Introduce la contraseña para resetear todos los bloques:');
+  if (pass === 'patata') {
+    if (confirm('¿Estás seguro de que quieres resetear todos los bloques? Esta acción no se puede deshacer.')) {
+      datos = {};
+      for (let i = 0; i < 80; i++) {
+        datos[i] = {
+          actividad: '',
+          cliente: '',
+          trabajador: '',
+          matricula: '',
+          marca: '',
+          ocupado: false,
+          topPct: 90,
+          leftPct: 90
+        };
+        db.collection('bloques').doc(i.toString()).set(datos[i]);
+      }
+      crearBloques();
+    }
+  } else {
+    alert('Contraseña incorrecta.');
+  }
+}
+
+function mostrarConfiguracion() {
+  const menu = document.getElementById('menuConfiguracion');
+  menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
+}
+
+function crearBloques() {
+  plano.innerHTML = '';
+  bloques = [];
+  const posiciones = ubicacionActual === 'taller' ? posicionesTaller : posicionesCampa;
+  for (let i = 0; i < 40; i++) {
+    const div = document.createElement('div');
+    div.className = 'bloque';
+    const globalIndex = ubicacionActual === 'taller' ? i : i + 40;
+    div.dataset.index = globalIndex;
+
+    if (!datos[globalIndex]) datos[globalIndex] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
+
+    const info = datos[globalIndex];
+    if (info.topPct !== undefined && info.leftPct !== undefined) {
+      div.style.top = info.topPct.toFixed(2) + '%';
+      div.style.left = info.leftPct.toFixed(2) + '%';
+    }
+
+    plano.appendChild(div);
+    bloques.push(div);
+
+    div.addEventListener('click', () => {
+      if (!modoEdicion) abrirModal(div);
     });
-  });
-  Promise.all(promises).then(() => {
-    mostrarMensaje('Todos los bloques reseteados');
-    cargarBloques();
+
+    let isDragging = false;
+    let offsetX, offsetY;
+    let bloqueActivo = null;
+
+    div.addEventListener('mousedown', (e) => {
+      if (!modoEdicion) return;
+      isDragging = true;
+      bloqueActivo = div;
+      offsetX = e.offsetX;
+      offsetY = e.offsetY;
+      div.style.cursor = 'grabbing';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging || !modoEdicion || !bloqueActivo) return;
+      const rect = plano.getBoundingClientRect();
+      const x = e.clientX - rect.left - offsetX;
+      const y = e.clientY - rect.top - offsetY;
+      if (x >= 0 && y >= 0 && x <= plano.offsetWidth - bloqueActivo.offsetWidth && y <= plano.offsetHeight - bloqueActivo.offsetHeight) {
+        bloqueActivo.style.left = `${(x / plano.offsetWidth) * 100}%`;
+        bloqueActivo.style.top = `${(y / plano.offsetHeight) * 100}%`;
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (isDragging && bloqueActivo) {
+        isDragging = false;
+        bloqueActivo.style.cursor = 'grab';
+        const index = bloqueActivo.dataset.index;
+        const topPx = bloqueActivo.getBoundingClientRect().top - plano.getBoundingClientRect().top;
+        const leftPx = bloqueActivo.getBoundingClientRect().left - plano.getBoundingClientRect().left;
+        const topPct = (topPx / plano.offsetHeight) * 100;
+        const leftPct = (leftPx / plano.offsetWidth) * 100;
+        datos[index].topPct = topPct;
+        datos[index].leftPct = leftPct;
+        db.collection('bloques').doc(index).set(datos[index]);
+        bloqueActivo = null;
+      }
+    });
+  }
+  renderizarBloques();
+  actualizarFondo();
+}
+
+function actualizarFondo() {
+  plano.classList.remove('taller', 'campa');
+  plano.classList.add(ubicacionActual);
+  plano.style.backgroundImage = `url('${ubicacionActual === 'taller' ? 'plano-fondo.png' : 'plano-campa.png'}')`;
+}
+
+function abrirModal(bloque) {
+  bloqueActual = bloque;
+  const index = bloque.dataset.index;
+  const info = datos[index];
+  actividadInput.value = info.actividad;
+  clienteInput.value = info.cliente;
+  trabajadorInput.value = info.trabajador;
+  matriculaInput.value = info.matricula;
+  marcaInput.value = info.marca;
+  modal.style.display = 'flex';
+}
+
+function guardarDatos() {
+  const nuevaActividad = parseInt(actividadInput.value);
+  if (isNaN(nuevaActividad)) {
+    alert("La actividad debe ser un número.");
+    return;
+  }
+  const indexActual = bloqueActual.dataset.index;
+  let bloqueExistente = null;
+  for (let id in datos) {
+    if (id !== indexActual && datos[id].actividad && parseInt(datos[id].actividad) === nuevaActividad) {
+      bloqueExistente = id;
+      break;
+    }
+  }
+  if (bloqueExistente !== null) {
+    const ubicacion = bloqueExistente < 40 ? 'Taller' : 'Campa';
+    const cambiar = confirm(`Ya existe un bloque con esa actividad en ${ubicacion} (bloque ${parseInt(bloqueExistente)+1}). ¿Quieres intercambiar la posición?`);
+    if (!cambiar) return;
+
+    // Intercambiar posiciones
+    const tmpTop = datos[bloqueExistente].topPct;
+    const tmpLeft = datos[bloqueExistente].leftPct;
+    datos[bloqueExistente].topPct = datos[indexActual].topPct;
+    datos[bloqueExistente].leftPct = datos[indexActual].leftPct;
+    datos[indexActual].topPct = tmpTop;
+    datos[indexActual].leftPct = tmpLeft;
+    const bloque1 = bloques.find(b => b.dataset.index === indexActual);
+    const bloque2 = bloques.find(b => b.dataset.index === bloqueExistente);
+    if (bloque1 && bloque2) {
+      bloque1.style.top = datos[indexActual].topPct.toFixed(2) + '%';
+      bloque1.style.left = datos[indexActual].leftPct.toFixed(2) + '%';
+      bloque2.style.top = datos[bloqueExistente].topPct.toFixed(2) + '%';
+      bloque2.style.left = datos[bloqueExistente].leftPct.toFixed(2) + '%';
+    }
+  }
+  const index = bloqueActual.dataset.index;
+  const rect = plano.getBoundingClientRect();
+  const topPx = bloqueActual.getBoundingClientRect().top - rect.top;
+  const leftPx = bloqueActual.getBoundingClientRect().left - rect.left;
+  const topPct = (topPx / plano.offsetHeight) * 100;
+  const leftPct = (leftPx / plano.offsetWidth) * 100;
+  datos[index] = {
+    actividad: actividadInput.value,
+    cliente: clienteInput.value,
+    trabajador: trabajadorInput.value,
+    matricula: matriculaInput.value.toUpperCase(),
+    marca: marcaInput.value.toUpperCase(),
+    ocupado: true,
+    topPct: topPct,
+    leftPct: leftPct
+  };
+  db.collection('bloques').doc(index).set(datos[index]);
+  renderizarBloques();
+  modal.style.display = 'none';
+}
+
+function liberarDatos() {
+  const index = bloqueActual.dataset.index;
+  datos[index] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
+  db.collection('bloques').doc(index).set(datos[index]);
+  renderizarBloques();
+  modal.style.display = 'none';
+}
+
+function renderizarBloques() {
+  bloques.forEach((bloque) => {
+    const i = parseInt(bloque.dataset.index);
+    const info = datos[i];
+    if (info.topPct !== undefined && info.leftPct !== undefined) {
+      bloque.style.top = info.topPct.toFixed(2) + '%';
+      bloque.style.left = info.leftPct.toFixed(2) + '%';
+    }
+    if (info.ocupado) {
+      bloque.style.backgroundColor = info.trabajador ? '#f00' : '#8f8';
+      bloque.innerHTML = `<div style='font-size:14px; font-weight:bold;'>${info.actividad}</div>`;
+    } else {
+      bloque.style.backgroundColor = '#ccc';
+      bloque.innerHTML = ``;
+    }
   });
 }
 
-// ========================
-// MENÚ DE CONFIGURACIÓN
-// ========================
-function mostrarConfiguracion() {
-  const menu = document.getElementById('menuConfiguracion');
-  menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
-}
+closeModal.onclick = () => modal.style.display = 'none';
+
+window.onload = () => {
+  db.collection("bloques").get().then((querySnapshot) => {
+    querySnapshot.forEach((doc) => {
+      datos[doc.id] = doc.data();
+    });
+    crearBloques();
+  });
+};

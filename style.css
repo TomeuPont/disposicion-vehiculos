@@ -113,11 +113,6 @@ body {
   background-position: center;
 }
 
-.bloque.terminado {
-  background-color: #FFD600 !important;
-  border: 2px solid #FFB300;
-}
-
 .plano-container.campa {
   background-position: center 20%;
 }
