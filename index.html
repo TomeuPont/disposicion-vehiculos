@@ -15,11 +15,32 @@
     <button onclick="mostrarConfiguracion()" id="botonConfiguracion">⚙️ Configuración</button>
     <div id="menuConfiguracion">
       <button onclick="alternarModo()">Activar modo edición</button><br><br>
+      <button onclick="mostrarGestionTrabajadores()">Gestionar trabajadores</button>
+<br><br>
       <button onclick="confirmarReseteo()">Resetear todos los bloques</button>
     </div>
   </div>
 </div>
 
+  <div class="modal" id="modalTrabajadores">
+  <div class="modal-content" style="width: 400px;">
+    <span class="close" onclick="cerrarModalTrabajadores()">&times;</span>
+    <h3>Gestión de Trabajadores</h3>
+    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+      <input type="text" id="nuevoTrabajador" placeholder="Nombre trabajador" style="flex-grow: 1;">
+      <button onclick="agregarTrabajador()">Añadir</button>
+    </div>
+    <ul id="listaTrabajadores" style="list-style: none; padding: 0; max-height: 300px; overflow-y: auto;">
+      <!-- Lista de trabajadores se cargará aquí -->
+    </ul>
+  </div>
+</div>
+
+<!-- Modifica el input de trabajador en el modal principal -->
+<select id="trabajador" style="width: 100%; margin-bottom: 10px; padding: 8px;">
+  <option value="">Seleccionar trabajador...</option>
+  <!-- Opciones se cargarán dinámicamente -->
+</select>
 <div class="plano-container" id="plano"></div>
 
 <div class="modal" id="modal">
