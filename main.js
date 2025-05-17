@@ -33,10 +33,11 @@ function alternarUbicacion() {
 
 function alternarModo() {
   modoEdicion = !modoEdicion;
-  const btn = document.querySelector('#menuConfiguracion button');
-  if (btn) {
-    btn.textContent = modoEdicion ? 'Bloquear edición' : 'Activar modo edición';
-  }
+}
+
+function mostrarConfiguracion() {
+  const menu = document.getElementById('menuConfiguracion');
+  menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
 }
 
 function confirmarReseteo() {
@@ -45,16 +46,7 @@ function confirmarReseteo() {
     if (confirm('¿Estás seguro de que quieres resetear todos los bloques? Esta acción no se puede deshacer.')) {
       datos = {};
       for (let i = 0; i < 80; i++) {
-        datos[i] = {
-          actividad: '',
-          cliente: '',
-          trabajador: '',
-          matricula: '',
-          marca: '',
-          ocupado: false,
-          topPct: 90,
-          leftPct: 90
-        };
+        datos[i] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
         db.collection('bloques').doc(i.toString()).set(datos[i]);
       }
       crearBloques();
@@ -63,12 +55,6 @@ function confirmarReseteo() {
     alert('Contraseña incorrecta.');
   }
 }
-
-function mostrarConfiguracion() {
-  const menu = document.getElementById('menuConfiguracion');
-  menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
-}
-
 
 function crearBloques() {
   plano.innerHTML = '';
@@ -140,8 +126,6 @@ function crearBloques() {
 }
 
 function actualizarFondo() {
-  plano.classList.remove('taller', 'campa');
-  plano.classList.add(ubicacionActual);
   plano.style.backgroundImage = `url('${ubicacionActual === 'taller' ? 'plano-fondo.png' : 'plano-campa.png'}')`;
 }
 

@@ -13,8 +13,8 @@
   <button onclick="alternarUbicacion()" id="btnUbicacion">Campa</button>
   <div style="position: relative; display: inline-block;">
     <button onclick="mostrarConfiguracion()" id="botonConfiguracion">⚙️ Configuración</button>
-    <div id="menuConfiguracion" style="display: none; position: absolute; top: 35px; left: 0; background: #fff; border: 1px solid #ccc; padding: 10px; border-radius: 6px; box-shadow: 0 0 6px rgba(0,0,0,0.2); z-index: 1000;">
-      <button onclick="alternarModo()" id="botonModo">Activar modo edición</button><br><br>
+    <div id="menuConfiguracion">
+      <button onclick="alternarModo()">Activar modo edición</button><br><br>
       <button onclick="confirmarReseteo()">Resetear todos los bloques</button>
     </div>
   </div>
@@ -31,14 +31,13 @@
     <input type="text" id="marca" placeholder="Marca">
     <input type="text" id="cliente" placeholder="Cliente">
     <input type="text" id="trabajador" placeholder="Trabajador">
-    <label><input type="checkbox" id="terminado"> Terminado</label>
     <button onclick="guardarDatos()">Guardar</button>
     <button onclick="liberarDatos()">Liberar</button>
   </div>
 </div>
 
 <div id="mensajeEstado">Estado</div>
-<div class="version">Versión 1.6.6</div>
+<div class="version">Versión 1.6.0</div>
 
 <script src="main.js"></script>
 </body>
