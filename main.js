@@ -34,11 +34,10 @@ function alternarUbicacion() {
 
 function alternarModo() {
   modoEdicion = !modoEdicion;
-}
-
-function mostrarConfiguracion() {
-  const menu = document.getElementById('menuConfiguracion');
-  menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
+  const btn = document.querySelector('#menuConfiguracion button');
+  if (btn) {
+    btn.textContent = modoEdicion ? 'Bloquear edición' : 'Activar modo edición';
+  }
 }
 
 function confirmarReseteo() {
@@ -47,7 +46,16 @@ function confirmarReseteo() {
     if (confirm('¿Estás seguro de que quieres resetear todos los bloques? Esta acción no se puede deshacer.')) {
       datos = {};
       for (let i = 0; i < 80; i++) {
-        datos[i] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
+        datos[i] = {
+          actividad: '',
+          cliente: '',
+          trabajador: '',
+          matricula: '',
+          marca: '',
+          ocupado: false,
+          topPct: 90,
+          leftPct: 90
+        };
         db.collection('bloques').doc(i.toString()).set(datos[i]);
       }
       crearBloques();
@@ -55,6 +63,11 @@ function confirmarReseteo() {
   } else {
     alert('Contraseña incorrecta.');
   }
+}
+
+function mostrarConfiguracion() {
+  const menu = document.getElementById('menuConfiguracion');
+  menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
 }
 
 function crearBloques() {
