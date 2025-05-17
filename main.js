@@ -154,73 +154,54 @@ function abrirModal(bloque) {
   trabajadorInput.value = info.trabajador;
   matriculaInput.value = info.matricula;
   marcaInput.value = info.marca;
+  terminadoInput.checked = info.terminado || false; // Añadir esta línea
   modal.style.display = 'flex';
 }
-
 function guardarDatos() {
   const nuevaActividad = parseInt(actividadInput.value);
   if (isNaN(nuevaActividad)) {
     alert("La actividad debe ser un número.");
     return;
   }
-  const indexActual = bloqueActual.dataset.index;
-  let bloqueExistente = null;
-  for (let id in datos) {
-    if (id !== indexActual && datos[id].actividad && parseInt(datos[id].actividad) === nuevaActividad) {
-      bloqueExistente = id;
-      break;
-    }
-  }
-  if (bloqueExistente !== null) {
-    const ubicacion = bloqueExistente < 40 ? 'Taller' : 'Campa';
-    const cambiar = confirm(`Ya existe un bloque con esa actividad en ${ubicacion} (bloque ${parseInt(bloqueExistente)+1}). ¿Quieres intercambiar la posición?`);
-    if (!cambiar) return;
-
-    // Intercambiar posiciones
-    const tmpTop = datos[bloqueExistente].topPct;
-    const tmpLeft = datos[bloqueExistente].leftPct;
-    datos[bloqueExistente].topPct = datos[indexActual].topPct;
-    datos[bloqueExistente].leftPct = datos[indexActual].leftPct;
-    datos[indexActual].topPct = tmpTop;
-    datos[indexActual].leftPct = tmpLeft;
-    const bloque1 = bloques.find(b => b.dataset.index === indexActual);
-    const bloque2 = bloques.find(b => b.dataset.index === bloqueExistente);
-    if (bloque1 && bloque2) {
-      bloque1.style.top = datos[indexActual].topPct.toFixed(2) + '%';
-      bloque1.style.left = datos[indexActual].leftPct.toFixed(2) + '%';
-      bloque2.style.top = datos[bloqueExistente].topPct.toFixed(2) + '%';
-      bloque2.style.left = datos[bloqueExistente].leftPct.toFixed(2) + '%';
-    }
-  }
+  
   const index = bloqueActual.dataset.index;
   const rect = plano.getBoundingClientRect();
   const topPx = bloqueActual.getBoundingClientRect().top - rect.top;
   const leftPx = bloqueActual.getBoundingClientRect().left - rect.left;
   const topPct = (topPx / plano.offsetHeight) * 100;
   const leftPct = (leftPx / plano.offsetWidth) * 100;
+  
   datos[index] = {
     actividad: actividadInput.value,
     cliente: clienteInput.value,
     trabajador: trabajadorInput.value,
     matricula: matriculaInput.value.toUpperCase(),
     marca: marcaInput.value.toUpperCase(),
+    terminado: terminadoInput.checked,  // Añadir esta línea
     ocupado: true,
     topPct: topPct,
     leftPct: leftPct
+  };
+  
+  db.collection('bloques').doc(index).set(datos[index]);
+  renderizarBloques();
+  modal.style.display = 'none';
+}
+function liberarDatos() {
+  const index = bloqueActual.dataset.index;
+  datos[index] = {
+    actividad: '', 
+    cliente: '', 
+    trabajador: '', 
+    matricula: '', 
+    marca: '', 
+    terminado: false,  // Añadir esta línea
+    ocupado: false
   };
   db.collection('bloques').doc(index).set(datos[index]);
   renderizarBloques();
   modal.style.display = 'none';
 }
-
-function liberarDatos() {
-  const index = bloqueActual.dataset.index;
-  datos[index] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
-  db.collection('bloques').doc(index).set(datos[index]);
-  renderizarBloques();
-  modal.style.display = 'none';
-}
-
 function renderizarBloques() {
   bloques.forEach((bloque) => {
     const i = parseInt(bloque.dataset.index);
@@ -229,16 +210,22 @@ function renderizarBloques() {
       bloque.style.top = info.topPct.toFixed(2) + '%';
       bloque.style.left = info.leftPct.toFixed(2) + '%';
     }
+    
     if (info.ocupado) {
-      bloque.style.backgroundColor = info.trabajador ? '#f00' : '#8f8';
+      if (info.terminado) {
+        bloque.style.backgroundColor = '#ff0'; // Amarillo para terminado
+      } else if (info.trabajador) {
+        bloque.style.backgroundColor = '#f00'; // Rojo para en proceso
+      } else {
+        bloque.style.backgroundColor = '#8f8'; // Verde para asignado
+      }
       bloque.innerHTML = `<div style='font-size:14px; font-weight:bold;'>${info.actividad}</div>`;
     } else {
-      bloque.style.backgroundColor = '#ccc';
+      bloque.style.backgroundColor = '#ccc'; // Gris para no ocupado
       bloque.innerHTML = ``;
     }
   });
 }
-
 closeModal.onclick = () => modal.style.display = 'none';
 
 window.onload = () => {
