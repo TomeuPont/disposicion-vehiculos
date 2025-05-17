@@ -193,6 +193,7 @@ function guardarDatos() {
     }
   }
   const index = bloqueActual.dataset.index;
+  datos[index].terminado = terminadoInput.checked;
   const rect = plano.getBoundingClientRect();
   const topPx = bloqueActual.getBoundingClientRect().top - rect.top;
   const leftPx = bloqueActual.getBoundingClientRect().left - rect.left;
@@ -229,8 +230,8 @@ function renderizarBloques() {
       bloque.style.top = info.topPct.toFixed(2) + '%';
       bloque.style.left = info.leftPct.toFixed(2) + '%';
     }
-    if (info.ocupado) {
-      bloque.style.backgroundColor = info.trabajador ? '#f00' : '#8f8';
+      if (info.ocupado) {
+  bloque.style.backgroundColor = info.terminado ? '#ff0' : (info.trabajador ? '#f00' : '#8f8');
       bloque.innerHTML = `<div style='font-size:14px; font-weight:bold;'>${info.actividad}</div>`;
     } else {
       bloque.style.backgroundColor = '#ccc';
