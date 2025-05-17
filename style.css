@@ -108,3 +108,11 @@ body {
   font-family: monospace;
   z-index: 20;
 }
+
+.plano-container.taller {
+  background-position: center;
+}
+
+.plano-container.campa {
+  background-position: center 20%;
+}
