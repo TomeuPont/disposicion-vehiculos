@@ -34,7 +34,7 @@ body {
   height: 100%;
   background-image: url('plano-fondo.png');
   background-size: cover;
-  background-position: center;
+  background-position: center 20%;
   border: 2px solid #333;
 }
 .bloque {
