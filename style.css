@@ -85,18 +85,33 @@ body {
   cursor: pointer;
   font-weight: bold;
 }
+
 #mensajeEstado {
   position: fixed;
   bottom: 10px;
   right: 10px;
-  background: #eee;
-  padding: 8px 12px;
+  padding: 10px 15px;
   border-radius: 6px;
-  box-shadow: 0 0 4px rgba(0,0,0,0.3);
+  box-shadow: 0 0 8px rgba(0,0,0,0.2);
   font-size: 14px;
   display: none;
+  z-index: 1000;
+  max-width: 300px;
+  text-align: center;
 }
-.version {
+
+/* Puedes mantener los colores que ya tenías o usar estos */
+#mensajeEstado.error {
+  background-color: #ffebee;
+  color: #c62828;
+  border-left: 4px solid #c62828;
+}
+
+#mensajeEstado.success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-left: 4px solid #2e7d32;
+}.version {
   position: fixed;
   top: 10px;
   right: 10px;
