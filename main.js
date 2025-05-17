@@ -227,20 +227,47 @@ function guardarDatos() {
   setTimeout(() => {
     mensajeEstado.style.display = 'none';
   }, 3000);
-}function liberarDatos() {
+}
+function liberarDatos() {
   const index = bloqueActual.dataset.index;
+  
+  // Obtener la posición actual antes de liberar
+  const rect = plano.getBoundingClientRect();
+  const topPx = bloqueActual.getBoundingClientRect().top - rect.top;
+  const leftPx = bloqueActual.getBoundingClientRect().left - rect.left;
+  const topPct = (topPx / plano.offsetHeight) * 100;
+  const leftPct = (leftPx / plano.offsetWidth) * 100;
+
   datos[index] = {
-    actividad: '', 
-    cliente: '', 
-    trabajador: '', 
-    matricula: '', 
-    marca: '', 
-    terminado: false,  // Añadir esta línea
-    ocupado: false
+    actividad: '',
+    cliente: '',
+    trabajador: '',
+    matricula: '',
+    marca: '',
+    terminado: false,
+    ocupado: false,
+    topPct: topPct,  // Mantener la posición X
+    leftPct: leftPct // Mantener la posición Y
   };
-  db.collection('bloques').doc(index).set(datos[index]);
-  renderizarBloques();
-  modal.style.display = 'none';
+
+  db.collection('bloques').doc(index).set(datos[index])
+    .then(() => {
+      renderizarBloques();
+      modal.style.display = 'none';
+      
+      // Mostrar mensaje de éxito
+      const mensajeEstado = document.getElementById('mensajeEstado');
+      mensajeEstado.textContent = 'Bloque liberado correctamente.';
+      mensajeEstado.className = 'success';
+      mensajeEstado.style.display = 'block';
+      
+      setTimeout(() => {
+        mensajeEstado.style.display = 'none';
+      }, 3000);
+    })
+    .catch((error) => {
+      console.error("Error al liberar bloque: ", error);
+    });
 }
 function renderizarBloques() {
   bloques.forEach((bloque) => {
