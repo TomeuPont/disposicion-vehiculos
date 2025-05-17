@@ -13,7 +13,7 @@
   <button onclick="alternarUbicacion()" id="btnUbicacion">Campa</button>
   <div style="position: relative; display: inline-block;">
     <button onclick="mostrarConfiguracion()" id="botonConfiguracion">⚙️ Configuración</button>
-    <div id="menuConfiguracion">
+    <div id="menuConfiguracion" style="display: none;">
       <button onclick="alternarModo()">Activar modo edición</button><br><br>
       <button onclick="confirmarReseteo()">Resetear todos los bloques</button><br><br>
       <button onclick="mostrarGestionTrabajadores()">Gestionar trabajadores</button>
@@ -23,8 +23,8 @@
 
 <div class="plano-container" id="plano"></div>
 
-<!-- Modal principal para edición de bloques -->
-<div class="modal" id="modal">
+<!-- Modal principal -->
+<div class="modal" id="modal" style="display: none;">
   <div class="modal-content">
     <span class="close" id="closeModal">&times;</span>
     <h3>Editar Bloque</h3>
@@ -35,17 +35,19 @@
     <select id="trabajador" style="width: 100%; margin-bottom: 10px; padding: 8px;">
       <option value="">Seleccionar trabajador...</option>
     </select>
-    <div style="margin: 10px 0; display: flex; flex-direction: row-reverse; align-items: center; gap: 6px;">
-      <input type="checkbox" id="terminado" style="margin: 0;">
-      <label for="terminado" style="margin: 0;">Terminado</label>
+    <label style="display: flex; align-items: center; gap: 5px;">
+      <input type="checkbox" id="terminado">
+      Terminado
+    </label>
+    <div style="margin-top: 15px; display: flex; gap: 10px;">
+      <button onclick="guardarDatos()">Guardar</button>
+      <button onclick="liberarDatos()">Liberar</button>
     </div>
-    <button onclick="guardarDatos()">Guardar</button>
-    <button onclick="liberarDatos()">Liberar</button>
   </div>
 </div>
 
-<!-- Modal para gestión de trabajadores -->
-<div class="modal" id="modalTrabajadores">
+<!-- Modal trabajadores -->
+<div class="modal" id="modalTrabajadores" style="display: none;">
   <div class="modal-content" style="width: 400px;">
     <span class="close" onclick="cerrarModalTrabajadores()">&times;</span>
     <h3>Gestión de Trabajadores</h3>
@@ -53,15 +55,13 @@
       <input type="text" id="nuevoTrabajador" placeholder="Nombre trabajador" style="flex-grow: 1;">
       <button onclick="agregarTrabajador()">Añadir</button>
     </div>
-    <ul id="listaTrabajadores" style="list-style: none; padding: 0; max-height: 300px; overflow-y: auto;">
-      <!-- Lista de trabajadores se cargará aquí -->
-    </ul>
+    <ul id="listaTrabajadores" style="list-style: none; padding: 0; max-height: 300px; overflow-y: auto;"></ul>
   </div>
 </div>
 
-<div id="mensajeEstado">Estado</div>
+<div id="mensajeEstado" style="display: none;">Estado</div>
 <div class="version">
-  Versión 1.8.4
+  Versión 1.8.5
   <div class="leyenda-colores">
     <span class="color-muestra libre"></span> Libre
     <span class="color-muestra ocupado"></span> Ocupado
