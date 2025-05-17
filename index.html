@@ -31,18 +31,25 @@
     <input type="text" id="marca" placeholder="Marca">
     <input type="text" id="cliente" placeholder="Cliente">
     <input type="text" id="trabajador" placeholder="Trabajador">
-      <div style="margin: 10px 0; display: flex; flex-direction: row-reverse; align-items: center; gap: 6px;">
-        <input type="checkbox" id="terminado" style="margin: 0;">
-        <label for="terminado" style="margin: 0;">Terminado</label>
-    </div>
+    <label>
+      <input type="checkbox" id="terminado">
+      Terminado
+    </label>
     <button onclick="guardarDatos()">Guardar</button>
     <button onclick="liberarDatos()">Liberar</button>
   </div>
 </div>
 
 <div id="mensajeEstado">Estado</div>
-<div class="version">Versión 1.7.9</div>
-
+<div class="version">
+  Versión 1.8.0
+  <div class="leyenda-colores">
+    <span class="color-muestra libre"></span> Libre
+    <span class="color-muestra ocupado"></span> Ocupado
+    <span class="color-muestra trabajando"></span> Trabajando
+    <span class="color-muestra terminado"></span> Terminado
+  </div>
+</div>
 <script src="main.js"></script>
 </body>
 </html>
