@@ -19,6 +19,7 @@ const clienteInput = document.getElementById('cliente');
 const trabajadorInput = document.getElementById('trabajador');
 const matriculaInput = document.getElementById('matricula');
 const marcaInput = document.getElementById('marca');
+const terminadoInput = document.getElementById('terminado');
 const botonUbicacion = document.getElementById('btnUbicacion');
 const closeModal = document.getElementById('closeModal');
 
