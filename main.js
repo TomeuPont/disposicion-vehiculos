@@ -22,7 +22,7 @@ const marcaInput = document.getElementById('marca');
 const terminadoInput = document.getElementById('terminado');
 const botonUbicacion = document.getElementById('btnUbicacion');
 const closeModal = document.getElementById('closeModal');
-
+const listaTrabajadores = document.getElementById('listaTrabajadores');
 const posicionesTaller = [...Array(40)].map((_, i) => ({top: 300 + (i % 5) * 60, left: 400 + Math.floor(i / 5) * 60}));
 const posicionesCampa = [...Array(40)].map((_, i) => ({top: 100 + (i % 5) * 60, left: 100 + Math.floor(i / 5) * 60}));
 
