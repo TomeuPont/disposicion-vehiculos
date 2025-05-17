@@ -132,3 +132,44 @@ body {
   gap: 5px;
   margin-bottom: 10px;
 }
+
+/* Añade esto al final de style.css */
+.version {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 12px;
+}
+
+.leyenda-colores {
+  display: flex;
+  gap: 10px;
+  font-size: 11px;
+  color: #ddd;
+  flex-wrap: wrap;
+}
+
+.color-muestra {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  margin-right: 2px;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.color-muestra.libre {
+  background-color: #ccc;
+}
+
+.color-muestra.ocupado {
+  background-color: #8f8;
+}
+
+.color-muestra.trabajando {
+  background-color: #f00;
+}
+
+.color-muestra.terminado {
+  background-color: #ff0;
+}
