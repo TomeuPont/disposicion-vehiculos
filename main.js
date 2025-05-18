@@ -409,7 +409,14 @@ function cargarTrabajadores() {
   db.collection("trabajadores").get().then((querySnapshot) => {
     trabajadores = [];
     querySnapshot.forEach((doc) => {
-      trabajadores.push(doc.data().nombre);
+      // Asegurar que los nombres existentes están en mayúsculas
+      const nombre = doc.data().nombre.toUpperCase();
+      trabajadores.push(nombre);
+      
+      // Opcional: actualizar en Firebase si no estaba en mayúsculas
+      if (doc.data().nombre !== nombre) {
+        doc.ref.update({ nombre: nombre });
+      }
     });
     actualizarSelectTrabajadores();
   });
