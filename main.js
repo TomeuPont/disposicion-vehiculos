@@ -377,21 +377,16 @@ function eliminarTrabajador(nombre) {
       .where("nombre", "==", nombre)
       .get()
       .then((querySnapshot) => {
-        // Eliminar de Firebase
         const eliminaciones = [];
         querySnapshot.forEach((doc) => {
           eliminaciones.push(doc.ref.delete());
         });
-        
         return Promise.all(eliminaciones);
       })
       .then(() => {
-        // Eliminar del array local
         trabajadores = trabajadores.filter(t => t !== nombre);
-        
-        // Actualizar el select y la lista visible
         actualizarSelectTrabajadores();
-        mostrarGestionTrabajadores();
+        mostrarGestionTrabajadores(); // Actualizar la vista
         
         // Mostrar mensaje de éxito
         const mensajeEstado = document.getElementById('mensajeEstado');
