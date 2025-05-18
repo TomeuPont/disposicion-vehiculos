@@ -358,10 +358,35 @@ function eliminarTrabajador(nombre) {
       .where("nombre", "==", nombre)
       .get()
       .then((querySnapshot) => {
+        // Eliminar de Firebase
+        const eliminaciones = [];
         querySnapshot.forEach((doc) => {
-          doc.ref.delete();
+          eliminaciones.push(doc.ref.delete());
         });
-        cargarTrabajadores();
+        
+        return Promise.all(eliminaciones);
+      })
+      .then(() => {
+        // Eliminar del array local
+        trabajadores = trabajadores.filter(t => t !== nombre);
+        
+        // Actualizar el select y la lista visible
+        actualizarSelectTrabajadores();
+        mostrarGestionTrabajadores();
+        
+        // Mostrar mensaje de éxito
+        const mensajeEstado = document.getElementById('mensajeEstado');
+        mensajeEstado.textContent = `Trabajador ${nombre} eliminado correctamente.`;
+        mensajeEstado.className = 'success';
+        mensajeEstado.style.display = 'block';
+        
+        setTimeout(() => {
+          mensajeEstado.style.display = 'none';
+        }, 3000);
+      })
+      .catch((error) => {
+        console.error("Error al eliminar trabajador: ", error);
+        alert("Error al eliminar trabajador");
       });
   }
 }
