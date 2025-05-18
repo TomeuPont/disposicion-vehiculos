@@ -302,7 +302,13 @@ function mostrarGestionTrabajadores() {
   
   lista.innerHTML = '';
   
-  // Ordenar alfabéticamente antes de mostrar
+  // Mostrar mensaje si no hay trabajadores
+  if (trabajadores.length === 0) {
+    lista.innerHTML = '<li style="color: #777; padding: 10px; text-align: center;">No hay trabajadores registrados</li>';
+    return;
+  }
+  
+  // Ordenar y mostrar
   trabajadores.sort().forEach(trabajador => {
     const li = document.createElement('li');
     li.innerHTML = `
@@ -311,9 +317,6 @@ function mostrarGestionTrabajadores() {
     `;
     lista.appendChild(li);
   });
-  
-  modal.style.display = 'flex';
-  document.getElementById('menuConfiguracion').style.display = 'none';
 }
 
 function cerrarModalTrabajadores() {
