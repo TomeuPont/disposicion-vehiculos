@@ -11,6 +11,7 @@ let datos = {};
 let modoEdicion = false;
 let bloqueActual;
 let ubicacionActual = 'taller';
+let trabajadores = []; 
 
 const plano = document.getElementById('plano');
 const modal = document.getElementById('modal');
