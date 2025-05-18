@@ -295,6 +295,84 @@ function renderizarBloques() {
 }
 closeModal.onclick = () => modal.style.display = 'none';
 
+// Eliminar el CSS del final del archivo (ya está en style.css)
+
+// Añadir estas funciones faltantes:
+function mostrarGestionTrabajadores() {
+  const modal = document.getElementById('modalTrabajadores');
+  const lista = document.getElementById('listaTrabajadores');
+  
+  lista.innerHTML = '';
+  trabajadores.sort().forEach(trabajador => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <span>${trabajador}</span>
+      <button onclick="eliminarTrabajador('${trabajador}')">Eliminar</button>
+    `;
+    lista.appendChild(li);
+  });
+  
+  modal.style.display = 'flex';
+  document.getElementById('menuConfiguracion').style.display = 'none';
+}
+
+function cerrarModalTrabajadores() {
+  document.getElementById('modalTrabajadores').style.display = 'none';
+}
+
+function agregarTrabajador() {
+  const input = document.getElementById('nuevoTrabajador');
+  const nombre = input.value.trim();
+  
+  if (nombre && !trabajadores.includes(nombre)) {
+    db.collection("trabajadores").add({
+      nombre: nombre
+    }).then(() => {
+      cargarTrabajadores();
+      input.value = '';
+    });
+  } else if (trabajadores.includes(nombre)) {
+    alert('Este trabajador ya existe');
+  }
+}
+
+function eliminarTrabajador(nombre) {
+  if (confirm(`¿Eliminar al trabajador ${nombre}?`)) {
+    db.collection("trabajadores")
+      .where("nombre", "==", nombre)
+      .get()
+      .then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          doc.ref.delete();
+        });
+        cargarTrabajadores();
+      });
+  }
+}
+
+function cargarTrabajadores() {
+  db.collection("trabajadores").get().then((querySnapshot) => {
+    trabajadores = [];
+    querySnapshot.forEach((doc) => {
+      trabajadores.push(doc.data().nombre);
+    });
+    actualizarSelectTrabajadores();
+  });
+}
+
+function actualizarSelectTrabajadores() {
+  const select = document.getElementById('trabajador');
+  select.innerHTML = '<option value="">Seleccionar trabajador...</option>';
+  
+  trabajadores.sort().forEach(trabajador => {
+    const option = document.createElement('option');
+    option.value = trabajador;
+    option.textContent = trabajador;
+    select.appendChild(option);
+  });
+}
+
+// Modificar el window.onload para cargar trabajadores:
 window.onload = () => {
   db.collection("bloques").get().then((querySnapshot) => {
     querySnapshot.forEach((doc) => {
@@ -302,35 +380,6 @@ window.onload = () => {
     });
     crearBloques();
   });
+  
+  cargarTrabajadores(); // Añadir esta línea
 };
-
-/* Estilos para la gestión de trabajadores */
-#listaTrabajadores li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 12px;
-  border-bottom: 1px solid #eee;
-}
-
-#listaTrabajadores li button {
-  background: #ff4444;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 2px 8px;
-  cursor: pointer;
-}
-
-#listaTrabajadores li button:hover {
-  background: #cc0000;
-}
-
-select {
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 8px center;
-  background-size: 14px;
-}
