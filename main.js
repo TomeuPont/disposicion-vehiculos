@@ -341,7 +341,7 @@ function cerrarModalTrabajadores() {
 
 function agregarTrabajador() {
   const input = document.getElementById('nuevoTrabajador');
-  const nombre = input.value.trim();
+  const nombre = input.value.trim().toUpperCase(); // Convertir a mayúsculas
   
   if (nombre && !trabajadores.includes(nombre)) {
     db.collection("trabajadores").add({
@@ -350,12 +350,12 @@ function agregarTrabajador() {
       // Actualizar la lista inmediatamente después de añadir
       trabajadores.push(nombre);
       actualizarSelectTrabajadores();
-      mostrarGestionTrabajadores(); // Esta línea refresca la vista
+      mostrarGestionTrabajadores();
       input.value = '';
       
       // Mostrar mensaje de éxito
       const mensajeEstado = document.getElementById('mensajeEstado');
-      mensajeEstado.textContent = `Trabajador ${nombre} añadido correctamente.`;
+      mensajeEstado.textContent = `TRABAJADOR ${nombre} AÑADIDO CORRECTAMENTE.`;
       mensajeEstado.className = 'success';
       mensajeEstado.style.display = 'block';
       
@@ -364,10 +364,10 @@ function agregarTrabajador() {
       }, 3000);
     }).catch(error => {
       console.error("Error al añadir trabajador: ", error);
-      alert("Error al añadir trabajador");
+      alert("ERROR AL AÑADIR TRABAJADOR");
     });
   } else if (trabajadores.includes(nombre)) {
-    alert('Este trabajador ya existe');
+    alert('ESTE TRABAJADOR YA EXISTE');
   }
 }
 
