@@ -219,3 +219,12 @@ select {
   background-position: right 8px center;
   background-size: 14px;
 }
+
+/* Asegurar que los modales tienen z-index alto */
+.modal {
+  z-index: 2000;
+}
+
+#modalTrabajadores {
+  z-index: 2001;
+}
