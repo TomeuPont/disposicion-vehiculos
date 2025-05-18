@@ -300,24 +300,40 @@ function mostrarGestionTrabajadores() {
   const modal = document.getElementById('modalTrabajadores');
   const lista = document.getElementById('listaTrabajadores');
   
+  // Limpiar lista actual
   lista.innerHTML = '';
   
   // Mostrar mensaje si no hay trabajadores
   if (trabajadores.length === 0) {
     lista.innerHTML = '<li style="color: #777; padding: 10px; text-align: center;">No hay trabajadores registrados</li>';
-    return;
+  } else {
+    // Ordenar y mostrar trabajadores
+    trabajadores.sort().forEach(trabajador => {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <span>${trabajador}</span>
+        <button class="btn-eliminar-trabajador" data-nombre="${trabajador}">Eliminar</button>
+      `;
+      lista.appendChild(li);
+    });
   }
   
-  // Ordenar y mostrar
-  trabajadores.sort().forEach(trabajador => {
-    const li = document.createElement('li');
-    li.innerHTML = `
-      <span>${trabajador}</span>
-      <button onclick="eliminarTrabajador('${trabajador}')">Eliminar</button>
-    `;
-    lista.appendChild(li);
-  });
+  // Mostrar modal y ocultar menú configuración
+  modal.style.display = 'flex';
+  document.getElementById('menuConfiguracion').style.display = 'none';
 }
+
+// Modificar el event listener para el botón
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btnGestionTrabajadores').addEventListener('click', mostrarGestionTrabajadores);
+  
+  // Delegación de eventos para los botones eliminar
+  document.getElementById('listaTrabajadores').addEventListener('click', (e) => {
+    if (e.target.classList.contains('btn-eliminar-trabajador')) {
+      eliminarTrabajador(e.target.dataset.nombre);
+    }
+  });
+});
 
 function cerrarModalTrabajadores() {
   document.getElementById('modalTrabajadores').style.display = 'none';
