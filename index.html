@@ -53,7 +53,9 @@
     <span class="close" onclick="cerrarModalTrabajadores()">&times;</span>
     <h3>Gestión de Trabajadores</h3>
     <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-      <input type="text" id="nuevoTrabajador" placeholder="Nombre trabajador" style="flex-grow: 1;">
+      <input type="text" id="nuevoTrabajador" placeholder="Nombre trabajador" 
+       style="flex-grow: 1; text-transform: uppercase;" 
+       oninput="this.value = this.value.toUpperCase()">  
       <button onclick="agregarTrabajador()">Añadir</button>
     </div>
     <ul id="listaTrabajadores" style="list-style: none; padding: 0; max-height: 300px; overflow-y: auto;"></ul>
@@ -62,7 +64,7 @@
 
 <div id="mensajeEstado" style="display: none;">Estado</div>
 <div class="version">
-  Versión 1.9.0
+  Versión 1.9.1
   <div class="leyenda-colores">
     <span class="color-muestra libre"></span> Libre
     <span class="color-muestra ocupado"></span> Ocupado
