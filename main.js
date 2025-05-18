@@ -328,8 +328,24 @@ function agregarTrabajador() {
     db.collection("trabajadores").add({
       nombre: nombre
     }).then(() => {
-      cargarTrabajadores();
+      // Actualizar la lista inmediatamente después de añadir
+      trabajadores.push(nombre);
+      actualizarSelectTrabajadores();
+      mostrarGestionTrabajadores(); // Esta línea refresca la vista
       input.value = '';
+      
+      // Mostrar mensaje de éxito
+      const mensajeEstado = document.getElementById('mensajeEstado');
+      mensajeEstado.textContent = `Trabajador ${nombre} añadido correctamente.`;
+      mensajeEstado.className = 'success';
+      mensajeEstado.style.display = 'block';
+      
+      setTimeout(() => {
+        mensajeEstado.style.display = 'none';
+      }, 3000);
+    }).catch(error => {
+      console.error("Error al añadir trabajador: ", error);
+      alert("Error al añadir trabajador");
     });
   } else if (trabajadores.includes(nombre)) {
     alert('Este trabajador ya existe');
