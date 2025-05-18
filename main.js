@@ -295,14 +295,13 @@ function renderizarBloques() {
 }
 closeModal.onclick = () => modal.style.display = 'none';
 
-// Eliminar el CSS del final del archivo (ya está en style.css)
-
-// Añadir estas funciones faltantes:
 function mostrarGestionTrabajadores() {
   const modal = document.getElementById('modalTrabajadores');
   const lista = document.getElementById('listaTrabajadores');
   
   lista.innerHTML = '';
+  
+  // Ordenar alfabéticamente antes de mostrar
   trabajadores.sort().forEach(trabajador => {
     const li = document.createElement('li');
     li.innerHTML = `
