@@ -53,18 +53,24 @@
     <span class="close" onclick="cerrarModalTrabajadores()">&times;</span>
     <h3>Gestión de Trabajadores</h3>
     <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-      <input type="text" id="nuevoTrabajador" placeholder="Nombre trabajador" 
-       style="flex-grow: 1; text-transform: uppercase;" 
-       oninput="this.value = this.value.toUpperCase()">  
+      <!-- REEMPLAZA EL INPUT ACTUAL POR ESTE NUEVO CÓDIGO -->
+      <input type="text" id="nuevoTrabajador" 
+             placeholder="Nombre trabajador" 
+             pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{2,50}" 
+             title="Solo letras y espacios (2-50 caracteres)"
+             required
+             style="flex-grow: 1; text-transform: uppercase;" 
+             oninput="this.value = this.value.toUpperCase()">
+      <!-- FIN DEL NUEVO CÓDIGO -->
       <button onclick="agregarTrabajador()">Añadir</button>
     </div>
     <ul id="listaTrabajadores" style="list-style: none; padding: 0; max-height: 300px; overflow-y: auto;"></ul>
   </div>
 </div>
-
+  
 <div id="mensajeEstado" style="display: none;">Estado</div>
 <div class="version">
-  Versión 1.9.3
+  Versión 1.9.4
   <div class="leyenda-colores">
     <span class="color-muestra libre"></span> Libre
     <span class="color-muestra ocupado"></span> Ocupado
