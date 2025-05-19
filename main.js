@@ -147,8 +147,6 @@ document.addEventListener('mouseup', () => {
   }
   renderizarBloques();
   actualizarFondo();
-  div.style.left = `${info.leftPct ?? 10}%`; // Usar porcentajes
-  div.style.top = `${info.topPct ?? 10}%`;   // desde el inicio
 }
 
 function actualizarFondo() {
