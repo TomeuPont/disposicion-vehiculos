@@ -101,65 +101,46 @@ function crearBloques() {
     let bloqueActivo = null;
 
     div.addEventListener('mousedown', (e) => {
-      if (!modoEdicion) return;
-      isDragging = true;
-      bloqueActivo = div;
-      offsetX = e.offsetX;
-      offsetY = e.offsetY;
-      div.style.cursor = 'grabbing';
-    });
+  if (!modoEdicion) return;
+  isDragging = true;
+  bloqueActivo = div;
+  offsetX = e.offsetX;
+  offsetY = e.offsetY;
+  div.style.cursor = 'grabbing';
+});
 
- /*   document.addEventListener('mousemove', (e) => {
-      if (!isDragging || !modoEdicion || !bloqueActivo) return;
-      const rect = plano.getBoundingClientRect();
-      const x = e.clientX - rect.left - offsetX;
-      const y = e.clientY - rect.top - offsetY;
-      if (x >= 0 && y >= 0 && x <= plano.offsetWidth - bloqueActivo.offsetWidth && y <= plano.offsetHeight - bloqueActivo.offsetHeight) {
-        bloqueActivo.style.left = `${(x / plano.offsetWidth) * 100}%`;
-        bloqueActivo.style.top = `${(y / plano.offsetHeight) * 100}%`;
-      }
-    }); */
-
-    document.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
+document.addEventListener('mousemove', (e) => {
+  if (!isDragging || !bloqueActivo) return;
   
-      const rect = plano.getBoundingClientRect();
-      const leftPct = ((e.clientX - rect.left) / rect.width) * 100;
-      const topPct = ((e.clientY - rect.top) / rect.height) * 100;
+  const rect = plano.getBoundingClientRect();
+  const leftPct = ((e.clientX - rect.left - offsetX) / rect.width) * 100;
+  const topPct = ((e.clientY - rect.top - offsetY) / rect.height) * 100;
   
-      bloqueActivo.style.left = `${leftPct}%`;
-      bloqueActivo.style.top = `${topPct}%`;
-});    
+  // Limitar dentro del contenedor
+  bloqueActivo.style.left = `${Math.max(0, Math.min(100, leftPct))}%`;
+  bloqueActivo.style.top = `${Math.max(0, Math.min(100, topPct))}%`;
+});
 
- /*   document.addEventListener('mouseup', () => {
-      if (isDragging && bloqueActivo) {
-        isDragging = false;
-        bloqueActivo.style.cursor = 'grab';
-        const index = bloqueActivo.dataset.index;
-        const topPx = bloqueActivo.getBoundingClientRect().top - plano.getBoundingClientRect().top;
-        const leftPx = bloqueActivo.getBoundingClientRect().left - plano.getBoundingClientRect().left;
-        const topPct = (topPx / plano.offsetHeight) * 100;
-        const leftPct = (leftPx / plano.offsetWidth) * 100;
-        datos[index].topPct = topPct;
-        datos[index].leftPct = leftPct;
-        db.collection('bloques').doc(index).set(datos[index]);
-        bloqueActivo = null;
-      }
-    });  */
-
-    document.addEventListener('mouseup', () => {
-    if (isDragging && bloqueActivo) {
-    const rect = plano.getBoundingClientRect();
-    const leftPct = (parseFloat(bloqueActivo.style.left) / rect.width) * 100;
-    const topPct = (parseFloat(bloqueActivo.style.top) / rect.height) * 100;
+document.addEventListener('mouseup', () => {
+  if (isDragging && bloqueActivo) {
+    isDragging = false;
+    bloqueActivo.style.cursor = 'grab';
     
-    // Guardar en Firebase usando porcentajes
+    const index = bloqueActivo.dataset.index;
+    const leftPct = parseFloat(bloqueActivo.style.left);
+    const topPct = parseFloat(bloqueActivo.style.top);
+    
+    // Actualizar datos locales
     datos[index].leftPct = leftPct;
     datos[index].topPct = topPct;
+    
+    // Guardar en Firebase
     db.collection('bloques').doc(index).update({
       leftPct: leftPct,
       topPct: topPct
     });
+    
+    bloqueActivo = null;
   }
 });
     
