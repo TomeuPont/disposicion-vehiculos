@@ -536,3 +536,17 @@ function monitorizarCalidadDatos() {
 
 // Ejecutar cada 24 horas
 setInterval(monitorizarCalidadDatos, 86400000);
+
+// Manejar redimensionamiento de pantalla
+window.addEventListener('resize', function() {
+  if (ubicacionActual) {
+    crearBloques();
+  }
+});
+
+// Inicializar al cargar
+window.addEventListener('load', function() {
+  // Asegurar que el contenedor tenga dimensiones
+  plano.style.height = (plano.offsetWidth * 0.5625) + 'px'; // 16:9 ratio
+  crearBloques();
+});
