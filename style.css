@@ -51,8 +51,8 @@ body {
 
 .bloque {
   position: absolute;
-  width: 4vw;
-  height: 4vw;
+  width: 5vmin; /* Tamaño relativo al viewport */
+  height: 5vmin;
   min-width: 30px;
   min-height: 30px;
   max-width: 70px;
@@ -71,7 +71,32 @@ body {
   align-items: center;
   box-sizing: border-box;
   line-height: 1.2;
+  transform: translate(-50%, -50%); /* Centrado preciso */
+  transition: transform 0.1s ease; /* Suavizar movimientos */
+  z-index: 10;
 }
+
+/* Estados del bloque */
+.bloque[data-ocupado="true"] {
+  background-color: #8f8; /* Verde para ocupado */
+}
+
+.bloque[data-trabajando="true"] {
+  background-color: #ff0; /* Amarillo para trabajando */
+}
+
+.bloque[data-terminado="true"] {
+  background-color: #f00; /* Rojo para terminado */
+}
+
+/* Efecto al arrastrar */
+.bloque.grabbing {
+  cursor: grabbing;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  z-index: 20;
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
 .modal {
   display: none;
   position: fixed;
