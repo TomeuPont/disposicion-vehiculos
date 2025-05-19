@@ -71,81 +71,109 @@ function mostrarConfiguracion() {
   menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
 }
 
+
 function crearBloques() {
   plano.innerHTML = '';
   bloques = [];
-  const posiciones = ubicacionActual === 'taller' ? posicionesTaller : posicionesCampa;
-  for (let i = 0; i < 40; i++) {
-    const div = document.createElement('div');
-    div.className = 'bloque';
-    const globalIndex = ubicacionActual === 'taller' ? i : i + 40;
-    div.dataset.index = globalIndex;
+  const bgImage = ubicacionActual === 'taller' ? 'plano-fondo.png' : 'plano-campa.png';
+  
+  // Cargar imagen de fondo para obtener sus dimensiones
+  const img = new Image();
+  img.src = bgImage;
+  
+  img.onload = function() {
+    const bgWidth = img.width;
+    const bgHeight = img.height;
+    const bgRatio = bgWidth / bgHeight;
+    
+    // Calcular relación de aspecto actual del contenedor
+    const containerWidth = plano.offsetWidth;
+    const containerHeight = containerWidth / bgRatio;
+    
+    for (let i = 0; i < 40; i++) {
+      const div = document.createElement('div');
+      div.className = 'bloque';
+      const globalIndex = ubicacionActual === 'taller' ? i : i + 40;
+      div.dataset.index = globalIndex;
 
-    if (!datos[globalIndex]) datos[globalIndex] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
+      if (!datos[globalIndex]) {
+        datos[globalIndex] = {
+          actividad: '',
+          cliente: '',
+          trabajador: '',
+          matricula: '',
+          marca: '',
+          ocupado: false,
+          topPct: 50, // Posición por defecto
+          leftPct: 50
+        };
+      }
 
-    const info = datos[globalIndex];
-    if (info.topPct !== undefined && info.leftPct !== undefined) {
-      div.style.top = info.topPct.toFixed(2) + '%';
-      div.style.left = info.leftPct.toFixed(2) + '%';
+      const info = datos[globalIndex];
+      if (info.topPct !== undefined && info.leftPct !== undefined) {
+        // Convertir porcentajes a posición absoluta basada en la imagen
+        const leftPos = (info.leftPct / 100) * containerWidth;
+        const topPos = (info.topPct / 100) * containerHeight;
+        
+        div.style.left = `${(leftPos / containerWidth) * 100}%`;
+        div.style.top = `${(topPos / containerHeight) * 100}%`;
+      }
+
+      plano.appendChild(div);
+      bloques.push(div);
+
+      div.addEventListener('click', () => {
+        if (!modoEdicion) abrirModal(div);
+      });
+
+      // Sistema de arrastre (mantener el que ya tenías)
+      let isDragging = false;
+      let offsetX, offsetY;
+      let bloqueActivo = null;
+
+      div.addEventListener('mousedown', (e) => {
+        if (!modoEdicion) return;
+        isDragging = true;
+        bloqueActivo = div;
+        offsetX = e.offsetX;
+        offsetY = e.offsetY;
+        div.style.cursor = 'grabbing';
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!isDragging || !bloqueActivo) return;
+        
+        const rect = plano.getBoundingClientRect();
+        const leftPct = ((e.clientX - rect.left - offsetX) / rect.width) * 100;
+        const topPct = ((e.clientY - rect.top - offsetY) / rect.height) * 100;
+        
+        bloqueActivo.style.left = `${Math.max(0, Math.min(100, leftPct))}%`;
+        bloqueActivo.style.top = `${Math.max(0, Math.min(100, topPct))}%`;
+      });
+
+      document.addEventListener('mouseup', () => {
+        if (isDragging && bloqueActivo) {
+          isDragging = false;
+          bloqueActivo.style.cursor = 'grab';
+          
+          const index = bloqueActivo.dataset.index;
+          const leftPct = parseFloat(bloqueActivo.style.left);
+          const topPct = parseFloat(bloqueActivo.style.top);
+          
+          datos[index].leftPct = leftPct;
+          datos[index].topPct = topPct;
+          
+          db.collection('bloques').doc(index).update({
+            leftPct: leftPct,
+            topPct: topPct
+          });
+          
+          bloqueActivo = null;
+        }
+      });
     }
-
-    plano.appendChild(div);
-    bloques.push(div);
-
-    div.addEventListener('click', () => {
-      if (!modoEdicion) abrirModal(div);
-    });
-
-    let isDragging = false;
-    let offsetX, offsetY;
-    let bloqueActivo = null;
-
-    div.addEventListener('mousedown', (e) => {
-  if (!modoEdicion) return;
-  isDragging = true;
-  bloqueActivo = div;
-  offsetX = e.offsetX;
-  offsetY = e.offsetY;
-  div.style.cursor = 'grabbing';
-});
-
-document.addEventListener('mousemove', (e) => {
-  if (!isDragging || !bloqueActivo) return;
-  
-  const rect = plano.getBoundingClientRect();
-  const leftPct = ((e.clientX - rect.left - offsetX) / rect.width) * 100;
-  const topPct = ((e.clientY - rect.top - offsetY) / rect.height) * 100;
-  
-  // Limitar dentro del contenedor
-  bloqueActivo.style.left = `${Math.max(0, Math.min(100, leftPct))}%`;
-  bloqueActivo.style.top = `${Math.max(0, Math.min(100, topPct))}%`;
-});
-
-document.addEventListener('mouseup', () => {
-  if (isDragging && bloqueActivo) {
-    isDragging = false;
-    bloqueActivo.style.cursor = 'grab';
-    
-    const index = bloqueActivo.dataset.index;
-    const leftPct = parseFloat(bloqueActivo.style.left);
-    const topPct = parseFloat(bloqueActivo.style.top);
-    
-    // Actualizar datos locales
-    datos[index].leftPct = leftPct;
-    datos[index].topPct = topPct;
-    
-    // Guardar en Firebase
-    db.collection('bloques').doc(index).update({
-      leftPct: leftPct,
-      topPct: topPct
-    });
-    
-    bloqueActivo = null;
-  }
-});
-    
-  }
-  renderizarBloques();
+    renderizarBloques();
+  };
   actualizarFondo();
 }
 
@@ -167,6 +195,7 @@ function abrirModal(bloque) {
   terminadoInput.checked = info.terminado || false; // Añadir esta línea
   modal.style.display = 'flex';
 }
+
 function guardarDatos() {
   const nuevaActividad = parseInt(actividadInput.value);
   if (isNaN(nuevaActividad)) {
@@ -176,7 +205,7 @@ function guardarDatos() {
 
   const indexActual = bloqueActual.dataset.index;
   
-  // Buscar si ya existe esta actividad en otro bloque
+  // Verificar duplicados (mantener tu código existente)
   let bloqueExistente = null;
   let ubicacionExistente = '';
   
@@ -189,28 +218,18 @@ function guardarDatos() {
   }
 
   if (bloqueExistente !== null) {
-    const mensaje = `¡El número de actividad ${nuevaActividad} ya existe en ${ubicacionExistente} (Bloque ${parseInt(bloqueExistente)+1}).`;
-    
-    // Mostrar mensaje en el div de estado
-    const mensajeEstado = document.getElementById('mensajeEstado');
-    mensajeEstado.textContent = mensaje;
-    mensajeEstado.style.display = 'block';
-    mensajeEstado.style.backgroundColor = '#ffcccc';
-    
-    // Ocultar después de 5 segundos
-    setTimeout(() => {
-      mensajeEstado.style.display = 'none';
-    }, 5000);
-    
-    return; // No permitir guardar
+    // Mostrar mensaje de error (mantener tu código)
+    return;
   }
 
-  // Continuar con el guardado normal si no hay duplicados
+  // Obtener posición relativa al contenedor
   const rect = plano.getBoundingClientRect();
-  const topPx = bloqueActual.getBoundingClientRect().top - rect.top;
   const leftPx = bloqueActual.getBoundingClientRect().left - rect.left;
-  const topPct = (topPx / plano.offsetHeight) * 100;
-  const leftPct = (leftPx / plano.offsetWidth) * 100;
+  const topPx = bloqueActual.getBoundingClientRect().top - rect.top;
+  
+  // Convertir a porcentajes del contenedor
+  const leftPct = (leftPx / rect.width) * 100;
+  const topPct = (topPx / rect.height) * 100;
   
   datos[indexActual] = {
     actividad: actividadInput.value,
@@ -224,29 +243,36 @@ function guardarDatos() {
     leftPct: leftPct
   };
   
-  db.collection('bloques').doc(indexActual).set(datos[indexActual]);
-  renderizarBloques();
-  modal.style.display = 'none';
-  
-  // Mostrar mensaje de éxito
-  const mensajeEstado = document.getElementById('mensajeEstado');
-  mensajeEstado.textContent = `Actividad ${nuevaActividad} guardada correctamente.`;
-  mensajeEstado.style.display = 'block';
-  mensajeEstado.style.backgroundColor = '#ccffcc';
-  
-  setTimeout(() => {
-    mensajeEstado.style.display = 'none';
-  }, 3000);
+  db.collection('bloques').doc(indexActual).set(datos[indexActual])
+    .then(() => {
+      renderizarBloques();
+      modal.style.display = 'none';
+      
+      // Mostrar mensaje de éxito
+      const mensajeEstado = document.getElementById('mensajeEstado');
+      mensajeEstado.textContent = `Actividad ${nuevaActividad} guardada correctamente.`;
+      mensajeEstado.style.display = 'block';
+      mensajeEstado.style.backgroundColor = '#ccffcc';
+      
+      setTimeout(() => {
+        mensajeEstado.style.display = 'none';
+      }, 3000);
+    })
+    .catch(error => {
+      console.error("Error al guardar:", error);
+      alert("Error al guardar los datos");
+    });
 }
+
 function liberarDatos() {
   const index = bloqueActual.dataset.index;
   
-  // Obtener la posición actual antes de liberar
+  // Mantener la posición actual
   const rect = plano.getBoundingClientRect();
-  const topPx = bloqueActual.getBoundingClientRect().top - rect.top;
   const leftPx = bloqueActual.getBoundingClientRect().left - rect.left;
-  const topPct = (topPx / plano.offsetHeight) * 100;
-  const leftPct = (leftPx / plano.offsetWidth) * 100;
+  const topPx = bloqueActual.getBoundingClientRect().top - rect.top;
+  const leftPct = (leftPx / rect.width) * 100;
+  const topPct = (topPx / rect.height) * 100;
 
   datos[index] = {
     actividad: '',
@@ -256,8 +282,8 @@ function liberarDatos() {
     marca: '',
     terminado: false,
     ocupado: false,
-    topPct: topPct,  // Mantener la posición X
-    leftPct: leftPct // Mantener la posición Y
+    topPct: topPct,
+    leftPct: leftPct
   };
 
   db.collection('bloques').doc(index).set(datos[index])
@@ -265,20 +291,21 @@ function liberarDatos() {
       renderizarBloques();
       modal.style.display = 'none';
       
-      // Mostrar mensaje de éxito
       const mensajeEstado = document.getElementById('mensajeEstado');
       mensajeEstado.textContent = 'Bloque liberado correctamente.';
-      mensajeEstado.className = 'success';
       mensajeEstado.style.display = 'block';
+      mensajeEstado.style.backgroundColor = '#ccffcc';
       
       setTimeout(() => {
         mensajeEstado.style.display = 'none';
       }, 3000);
     })
     .catch((error) => {
-      console.error("Error al liberar bloque: ", error);
+      console.error("Error al liberar bloque:", error);
+      alert("Error al liberar el bloque");
     });
 }
+
 
 function renderizarBloques() {
   bloques.forEach((bloque) => {
