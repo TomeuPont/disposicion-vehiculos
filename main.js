@@ -109,7 +109,7 @@ function crearBloques() {
       div.style.cursor = 'grabbing';
     });
 
-    document.addEventListener('mousemove', (e) => {
+ /*   document.addEventListener('mousemove', (e) => {
       if (!isDragging || !modoEdicion || !bloqueActivo) return;
       const rect = plano.getBoundingClientRect();
       const x = e.clientX - rect.left - offsetX;
@@ -118,9 +118,20 @@ function crearBloques() {
         bloqueActivo.style.left = `${(x / plano.offsetWidth) * 100}%`;
         bloqueActivo.style.top = `${(y / plano.offsetHeight) * 100}%`;
       }
-    });
+    }); */
 
-    document.addEventListener('mouseup', () => {
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+  
+      const rect = plano.getBoundingClientRect();
+      const leftPct = ((e.clientX - rect.left) / rect.width) * 100;
+      const topPct = ((e.clientY - rect.top) / rect.height) * 100;
+  
+      bloqueActivo.style.left = `${leftPct}%`;
+      bloqueActivo.style.top = `${topPct}%`;
+});    
+
+ /*   document.addEventListener('mouseup', () => {
       if (isDragging && bloqueActivo) {
         isDragging = false;
         bloqueActivo.style.cursor = 'grab';
@@ -134,10 +145,29 @@ function crearBloques() {
         db.collection('bloques').doc(index).set(datos[index]);
         bloqueActivo = null;
       }
+    });  */
+
+    document.addEventListener('mouseup', () => {
+    if (isDragging && bloqueActivo) {
+    const rect = plano.getBoundingClientRect();
+    const leftPct = (parseFloat(bloqueActivo.style.left) / rect.width) * 100;
+    const topPct = (parseFloat(bloqueActivo.style.top) / rect.height) * 100;
+    
+    // Guardar en Firebase usando porcentajes
+    datos[index].leftPct = leftPct;
+    datos[index].topPct = topPct;
+    db.collection('bloques').doc(index).update({
+      leftPct: leftPct,
+      topPct: topPct
     });
+  }
+});
+    
   }
   renderizarBloques();
   actualizarFondo();
+  div.style.left = `${info.leftPct ?? 10}%`; // Usar porcentajes
+  div.style.top = `${info.topPct ?? 10}%`;   // desde el inicio
 }
 
 function actualizarFondo() {
