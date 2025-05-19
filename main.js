@@ -270,6 +270,7 @@ function liberarDatos() {
       console.error("Error al liberar bloque: ", error);
     });
 }
+
 function renderizarBloques() {
   bloques.forEach((bloque) => {
     const i = parseInt(bloque.dataset.index);
@@ -280,20 +281,22 @@ function renderizarBloques() {
     }
     
     if (info.ocupado) {
+      // Cambios realizados aquí:
       if (info.terminado) {
-        bloque.style.backgroundColor = '#ff0'; // Amarillo para terminado
+        bloque.style.backgroundColor = '#f00'; // Rojo para terminado
       } else if (info.trabajador) {
-        bloque.style.backgroundColor = '#f00'; // Rojo para en proceso
+        bloque.style.backgroundColor = '#ff0'; // Amarillo para trabajando
       } else {
-        bloque.style.backgroundColor = '#8f8'; // Verde para asignado
+        bloque.style.backgroundColor = '#8f8'; // Verde para asignado (sin cambios)
       }
       bloque.innerHTML = `<div style='font-size:14px; font-weight:bold;'>${info.actividad}</div>`;
     } else {
-      bloque.style.backgroundColor = '#ccc'; // Gris para no ocupado
+      bloque.style.backgroundColor = '#ccc'; // Gris para no ocupado (sin cambios)
       bloque.innerHTML = ``;
     }
   });
 }
+
 closeModal.onclick = () => modal.style.display = 'none';
 
 function mostrarGestionTrabajadores() {
