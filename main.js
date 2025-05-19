@@ -468,3 +468,32 @@ window.onload = async () => {
   await cargarTrabajadores();
 };
 ;
+
+// Añade esta función para verificar periódicamente la calidad de los datos
+function monitorizarCalidadDatos() {
+  db.collection("trabajadores").get().then((querySnapshot) => {
+    const reporte = {
+      total: querySnapshot.size,
+      invalidos: 0,
+      detalles: []
+    };
+    
+    querySnapshot.forEach((doc) => {
+      if (!doc.data().nombre || typeof doc.data().nombre !== 'string') {
+        reporte.invalidos++;
+        reporte.detalles.push({
+          id: doc.id,
+          data: doc.data()
+        });
+      }
+    });
+    
+    if (reporte.invalidos > 0) {
+      console.warn("Documentos inválidos detectados:", reporte);
+      // Opcional: enviar notificación por email o a un canal de Slack
+    }
+  });
+}
+
+// Ejecutar cada 24 horas
+setInterval(monitorizarCalidadDatos, 86400000);
