@@ -406,25 +406,35 @@ function eliminarTrabajador(nombre) {
 }
 
 function cargarTrabajadores() {
-  db.collection("trabajadores").get().then((querySnapshot) => {
-    trabajadores = [];
-    querySnapshot.forEach((doc) => {
-      // Asegurar que los nombres existentes están en mayúsculas
-      const nombre = doc.data().nombre.toUpperCase();
-      trabajadores.push(nombre);
-      
-      // Opcional: actualizar en Firebase si no estaba en mayúsculas
-      if (doc.data().nombre !== nombre) {
-        doc.ref.update({ nombre: nombre });
-      }
+  return new Promise((resolve) => {
+    db.collection("trabajadores").get().then((querySnapshot) => {
+      trabajadores = [];
+      querySnapshot.forEach((doc) => {
+        const nombre = doc.data().nombre.toUpperCase();
+        trabajadores.push(nombre);
+        
+        // Actualizar en Firebase si no estaba en mayúsculas
+        if (doc.data().nombre !== nombre) {
+          doc.ref.update({ nombre: nombre });
+        }
+      });
+      actualizarSelectTrabajadores();
+      resolve();
+    }).catch(error => {
+      console.error("Error cargando trabajadores:", error);
+      resolve();
     });
-    actualizarSelectTrabajadores();
   });
 }
 
 function actualizarSelectTrabajadores() {
   const select = document.getElementById('trabajador');
   select.innerHTML = '<option value="">Seleccionar trabajador...</option>';
+  
+  if (trabajadores.length === 0) {
+    console.warn("No hay trabajadores cargados");
+    return;
+  }
   
   trabajadores.sort().forEach(trabajador => {
     const option = document.createElement('option');
@@ -434,8 +444,9 @@ function actualizarSelectTrabajadores() {
   });
 }
 
-// Modificar el window.onload para cargar trabajadores:
-window.onload = () => {
+
+window.onload = async () => {
+  // Cargar bloques primero
   db.collection("bloques").get().then((querySnapshot) => {
     querySnapshot.forEach((doc) => {
       datos[doc.id] = doc.data();
@@ -443,5 +454,7 @@ window.onload = () => {
     crearBloques();
   });
   
-  cargarTrabajadores(); // Añadir esta línea
+  // Luego cargar trabajadores y esperar a que termine
+  await cargarTrabajadores();
 };
+;
