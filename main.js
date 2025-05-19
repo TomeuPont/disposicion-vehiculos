@@ -410,12 +410,18 @@ function cargarTrabajadores() {
     db.collection("trabajadores").get().then((querySnapshot) => {
       trabajadores = [];
       querySnapshot.forEach((doc) => {
-        const nombre = doc.data().nombre.toUpperCase();
-        trabajadores.push(nombre);
-        
-        // Actualizar en Firebase si no estaba en mayúsculas
-        if (doc.data().nombre !== nombre) {
-          doc.ref.update({ nombre: nombre });
+        const trabajadorData = doc.data();
+        // Verificar que el campo 'nombre' existe y no es null/undefined
+        if (trabajadorData.nombre && typeof trabajadorData.nombre === 'string') {
+          const nombre = trabajadorData.nombre.toUpperCase();
+          trabajadores.push(nombre);
+          
+          // Actualizar en Firebase si no estaba en mayúsculas
+          if (trabajadorData.nombre !== nombre) {
+            doc.ref.update({ nombre: nombre });
+          }
+        } else {
+          console.warn(`Documento ${doc.id} no tiene un nombre válido:`, trabajadorData);
         }
       });
       actualizarSelectTrabajadores();
@@ -429,21 +435,25 @@ function cargarTrabajadores() {
 
 function actualizarSelectTrabajadores() {
   const select = document.getElementById('trabajador');
-  select.innerHTML = '<option value="">Seleccionar trabajador...</option>';
+  
+  // Limpiar select manteniendo la primera opción por defecto
+  while (select.options.length > 1) {
+    select.remove(1);
+  }
   
   if (trabajadores.length === 0) {
-    console.warn("No hay trabajadores cargados");
+    console.warn("No hay trabajadores válidos cargados");
     return;
   }
   
+  // Ordenar alfabéticamente y añadir opciones
   trabajadores.sort().forEach(trabajador => {
-    const option = document.createElement('option');
-    option.value = trabajador;
-    option.textContent = trabajador;
-    select.appendChild(option);
+    if (trabajador && typeof trabajador === 'string') {
+      const option = new Option(trabajador, trabajador);
+      select.add(option);
+    }
   });
 }
-
 
 window.onload = async () => {
   // Cargar bloques primero
