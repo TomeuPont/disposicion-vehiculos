@@ -182,11 +182,11 @@ body {
 }
 
 .color-muestra.trabajando {
-  background-color: #f00;
+  background-color: #ff0; /* Amarillo */
 }
 
 .color-muestra.terminado {
-  background-color: #ff0;
+  background-color: #f00; /* Rojo */
 }
 
 /* Estilos para la gestión de trabajadores */
