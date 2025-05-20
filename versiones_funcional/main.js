@@ -78,12 +78,12 @@ function crearBloques() {
   // Posiciones iniciales basadas en la ubicación
   const posiciones = ubicacionActual === 'taller' ? 
     [...Array(40)].map((_, i) => ({
-      left: 30 + (i % 8) * 8, 
-      top: 30 + Math.floor(i / 8) * 8
+      left: 15 + (i % 7) * 12,  // Más espaciado horizontal
+      top: 20 + Math.floor(i / 7) * 12 // Más espaciado vertical
     })) : 
     [...Array(40)].map((_, i) => ({
-      left: 20 + (i % 7) * 10, 
-      top: 20 + Math.floor(i / 7) * 10
+      left: 15 + (i % 6) * 14,  // Más espaciado para campa
+      top: 20 + Math.floor(i / 6) * 14
     }));
 
   for (let i = 0; i < 40; i++) {
