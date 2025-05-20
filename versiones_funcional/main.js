@@ -169,13 +169,10 @@ function crearBloques() {
   actualizarFondo();
 }
 
-
 function actualizarFondo() {
   plano.classList.remove('taller', 'campa');
   plano.classList.add(ubicacionActual);
-  
-  // Forzar redimensionamiento
-  crearBloques();
+  plano.style.backgroundSize = 'cover';
 }
 
 function abrirModal(bloque) {
@@ -538,9 +535,3 @@ window.addEventListener('resize', function() {
   crearBloques();
 });
 
-// Inicializar al cargar
-window.addEventListener('load', function() {
-  // Asegurar que el contenedor tenga dimensiones
-  plano.style.height = (plano.offsetWidth * 0.5625) + 'px'; // 16:9 ratio
-  crearBloques();
-});
