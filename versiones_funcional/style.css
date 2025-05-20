@@ -51,47 +51,35 @@ body {
 
 .bloque {
   position: absolute;
-  width: 4vmin;
-  height: 4vmin;
+  width: 5vmin;
+  height: 5vmin;
   min-width: 30px;
   min-height: 30px;
   max-width: 70px;
   max-height: 70px;
-  background-color: #ccc;
-  border: 1px solid #000;
+  background-color: rgba(204, 204, 204, 0.8);
+  border: 2px solid #000;
   border-radius: 6px;
   transform: translate(-50%, -50%);
-  transition: all 0.1s ease;
-  cursor: grab;
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 14px;
   font-weight: bold;
   z-index: 10;
-  box-sizing: border-box;
-  padding: 2px;
-  user-select: none;
+  box-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
+
+/* Estados de los bloques */
+.bloque[data-ocupado="true"] { background-color: rgba(136, 255, 136, 0.8); }
+.bloque[data-trabajando="true"] { background-color: rgba(255, 255, 0, 0.8); }
+.bloque[data-terminado="true"] { background-color: rgba(255, 0, 0, 0.8); }
 
 .bloque:active {
   cursor: grabbing;
   transform: translate(-50%, -50%) scale(1.05);
   z-index: 20;
   box-shadow: 0 0 10px rgba(0,0,0,0.5);
-}
-
-/* Estados del bloque */
-.bloque[data-ocupado="true"] {
-  background-color: #8f8; /* Verde para ocupado */
-}
-
-.bloque[data-trabajando="true"] {
-  background-color: #ff0; /* Amarillo para trabajando */
-}
-
-.bloque[data-terminado="true"] {
-  background-color: #f00; /* Rojo para terminado */
 }
 
 /* Efecto al arrastrar */
