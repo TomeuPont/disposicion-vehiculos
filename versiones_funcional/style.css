@@ -37,7 +37,9 @@ body {
   overflow: hidden;
   margin: 0;
   padding: 0;
+  background-color: #f0f0f0;
 }
+
 
 .plano-container.taller {
   background-image: url('plano-fondo.png');
