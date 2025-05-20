@@ -124,9 +124,9 @@ function actualizarFondo() {
   
   // Ajustes específicos para cada ubicación
   if (ubicacionActual === 'taller') {
-    plano.style.backgroundPosition = 'center 70%';
+    plano.style.backgroundPosition = 'center 60%';
   } else {
-    plano.style.backgroundPosition = 'center 30%';
+    plano.style.backgroundPosition = 'center 40%';
   }
 }
 
