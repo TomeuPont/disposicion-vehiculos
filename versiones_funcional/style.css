@@ -34,21 +34,19 @@ body {
   height: 100vh;
   background-size: cover;
   background-repeat: no-repeat;
-  background-position: center;
   overflow: hidden;
   margin: 0;
   padding: 0;
-  background-color: #f0f0f0; /* Color de fondo temporal */
 }
 
 .plano-container.taller {
   background-image: url('plano-fondo.png');
-  background-size: cover;
+  background-position: center 70%; /* Ajustado para taller */
 }
 
 .plano-container.campa {
   background-image: url('plano-campa.png');
-  background-size: cover;
+  background-position: center 30%; /* Ajustado para campa */
 }
 
 .bloque {
