@@ -36,17 +36,19 @@ body {
   background-repeat: no-repeat;
   background-position: center;
   overflow: hidden;
-  border: none;
   margin: 0;
   padding: 0;
+  background-color: #f0f0f0; /* Color de fondo temporal */
 }
 
 .plano-container.taller {
   background-image: url('plano-fondo.png');
+  background-size: cover;
 }
 
 .plano-container.campa {
   background-image: url('plano-campa.png');
+  background-size: cover;
 }
 
 .bloque {
