@@ -75,37 +75,34 @@ function crearBloques() {
   plano.innerHTML = '';
   bloques = [];
   
-  // Obtener relación de aspecto de la imagen de fondo
   const img = new Image();
   img.src = ubicacionActual === 'taller' ? 'plano-fondo.png' : 'plano-campa.png';
   
   img.onload = function() {
-    const bgAspectRatio = img.width / img.height;
-    const windowAspectRatio = window.innerWidth / window.innerHeight;
+    // Ajustar el contenedor para llenar la pantalla manteniendo la relación de aspecto
+    plano.style.width = '100vw';
+    plano.style.height = '100vh';
+    plano.style.backgroundSize = 'cover';
     
-    // Ajustar el contenedor para que coincida con la relación de aspecto
-    if (windowAspectRatio > bgAspectRatio) {
-      // Ventana más ancha que la imagen
-      plano.style.height = '100vh';
-      plano.style.width = `${bgAspectRatio * 100}vh`;
-    } else {
-      // Ventana más alta que la imagen
-      plano.style.width = '100vw';
-      plano.style.height = `${100 / bgAspectRatio}vw`;
-    }
-    
-    // Centrar el contenedor
-    plano.style.marginLeft = `${(window.innerWidth - plano.offsetWidth) / 2}px`;
-    plano.style.marginTop = `${(window.innerHeight - plano.offsetHeight) / 2}px`;
-
-    // Crear bloques con posiciones relativas
+    // Crear bloques con posiciones absolutas
     for (let i = 0; i < 40; i++) {
       const div = document.createElement('div');
       div.className = 'bloque';
       const globalIndex = ubicacionActual === 'taller' ? i : i + 40;
       div.dataset.index = globalIndex;
 
-      if (!datos[globalIndex]) datos[globalIndex] = { /*...*/ };
+      if (!datos[globalIndex]) {
+        datos[globalIndex] = {
+          actividad: '',
+          cliente: '',
+          trabajador: '',
+          matricula: '',
+          marca: '',
+          ocupado: false,
+          topPct: 50,
+          leftPct: 50
+        };
+      }
 
       const info = datos[globalIndex];
       if (info.topPct !== undefined && info.leftPct !== undefined) {
@@ -113,7 +110,58 @@ function crearBloques() {
         div.style.top = `${info.topPct}%`;
       }
 
-      // Resto del código de creación de bloques...
+      plano.appendChild(div);
+      bloques.push(div);
+
+      // Sistema de arrastre (mantener el existente)
+      div.addEventListener('click', () => {
+        if (!modoEdicion) abrirModal(div);
+      });
+
+      let isDragging = false;
+      let offsetX, offsetY;
+      let bloqueActivo = null;
+
+      div.addEventListener('mousedown', (e) => {
+        if (!modoEdicion) return;
+        isDragging = true;
+        bloqueActivo = div;
+        offsetX = e.offsetX;
+        offsetY = e.offsetY;
+        div.style.cursor = 'grabbing';
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!isDragging || !bloqueActivo) return;
+        
+        const rect = plano.getBoundingClientRect();
+        const leftPct = ((e.clientX - rect.left - offsetX) / rect.width) * 100;
+        const topPct = ((e.clientY - rect.top - offsetY) / rect.height) * 100;
+        
+        bloqueActivo.style.left = `${Math.max(0, Math.min(100, leftPct))}%`;
+        bloqueActivo.style.top = `${Math.max(0, Math.min(100, topPct))}%`;
+      });
+
+      document.addEventListener('mouseup', () => {
+        if (isDragging && bloqueActivo) {
+          isDragging = false;
+          bloqueActivo.style.cursor = 'grab';
+          
+          const index = bloqueActivo.dataset.index;
+          const leftPct = parseFloat(bloqueActivo.style.left);
+          const topPct = parseFloat(bloqueActivo.style.top);
+          
+          datos[index].leftPct = leftPct;
+          datos[index].topPct = topPct;
+          
+          db.collection('bloques').doc(index).update({
+            leftPct: leftPct,
+            topPct: topPct
+          });
+          
+          bloqueActivo = null;
+        }
+      });
     }
     renderizarBloques();
   };
