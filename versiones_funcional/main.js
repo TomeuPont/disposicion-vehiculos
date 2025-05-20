@@ -131,17 +131,28 @@ function actualizarFondo() {
 }
 
 function abrirModal(bloque) {
+  // Verificar si el modo edición está activo
+  if (modoEdicion) return;
+  
   bloqueActual = bloque;
   const index = bloque.dataset.index;
   const info = datos[index];
-  actividadInput.value = info.actividad;
-  clienteInput.value = info.cliente;
-  trabajadorInput.value = info.trabajador;
-  matriculaInput.value = info.matricula;
-  marcaInput.value = info.marca;
-  terminadoInput.checked = info.terminado || false; // Añadir esta línea
+  
+  // Llenar el formulario del modal
+  actividadInput.value = info.actividad || '';
+  clienteInput.value = info.cliente || '';
+  trabajadorInput.value = info.trabajador || '';
+  matriculaInput.value = info.matricula || '';
+  marcaInput.value = info.marca || '';
+  terminadoInput.checked = info.terminado || false;
+  
+  // Mostrar el modal
   modal.style.display = 'flex';
+  
+  // Enfocar el primer campo
+  actividadInput.focus();
 }
+
 
 function guardarDatos() {
   const nuevaActividad = parseInt(actividadInput.value);
