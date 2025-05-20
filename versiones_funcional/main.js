@@ -35,11 +35,19 @@ function alternarUbicacion() {
 
 function alternarModo() {
   modoEdicion = !modoEdicion;
-  const btn = document.querySelector('#menuConfiguracion button');
+  const btn = document.querySelector('#menuConfiguracion button:first-child');
   if (btn) {
-    btn.textContent = modoEdicion ? 'Bloquear edición' : 'Activar modo edición';
+    btn.textContent = modoEdicion ? 'Desactivar modo edición' : 'Activar modo edición';
+  }
+  
+  // Feedback visual del modo edición
+  if (modoEdicion) {
+    plano.style.outline = '2px dashed #4CAF50';
+  } else {
+    plano.style.outline = 'none';
   }
 }
+
 
 function confirmarReseteo() {
   const pass = prompt('Introduce la contraseña para resetear todos los bloques:');
