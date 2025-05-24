@@ -239,21 +239,27 @@ function guardarDatos() {
 
   const indexActual = bloqueActual.dataset.index;
   
-  // Verificar duplicados (código existente)
-  let bloqueExistente = null;
-  let ubicacionExistente = '';
+  // Buscar si ya existe esta actividad en otro bloque
+  let actividadDuplicada = false;
   
   for (let id in datos) {
     if (id !== indexActual && datos[id].actividad && parseInt(datos[id].actividad) === nuevaActividad) {
-      bloqueExistente = id;
-      ubicacionExistente = id < 40 ? 'el Taller' : 'la Campa';
+      actividadDuplicada = true;
       break;
     }
   }
 
-  if (bloqueExistente !== null) {
-    // Mostrar mensaje de error (código existente)
-    return;
+  if (actividadDuplicada) {
+    const mensajeEstado = document.getElementById('mensajeEstado');
+    mensajeEstado.textContent = `¡El número de actividad ${nuevaActividad} ya existe!`;
+    mensajeEstado.style.display = 'block';
+    mensajeEstado.style.backgroundColor = '#ffcccc';
+    
+    setTimeout(() => {
+      mensajeEstado.style.display = 'none';
+    }, 5000);
+    
+    return; // No permitir guardar
   }
 
   // Obtener posición ACTUAL del bloque (sin recálculos)
