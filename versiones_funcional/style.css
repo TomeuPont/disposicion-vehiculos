@@ -292,3 +292,30 @@ select {
 #modalTrabajadores {
   z-index: 2001;
 }
+
+/* Añadir al final del archivo */
+
+/* Mejoras para interacción con bloques */
+.bloque {
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  touch-action: none; /* Importante para dispositivos táctiles */
+}
+
+.bloque.grabbing {
+  transform: translate(-50%, -50%) scale(1.05);
+  box-shadow: 0 0 15px rgba(0,0,0,0.7);
+  z-index: 100;
+}
+
+/* Feedback visual para modo edición */
+.modo-edicion .bloque {
+  outline: 2px dashed rgba(76, 175, 80, 0.5);
+}
+
+/* Mejorar visibilidad de modales */
+.modal {
+  z-index: 1000;
+}
+.modal-content {
+  z-index: 1001;
+}
