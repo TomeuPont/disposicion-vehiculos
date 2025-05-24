@@ -79,18 +79,65 @@ function mostrarConfiguracion() {
   menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
 }
 
+
+// [El resto del código permanece igual hasta la función crearBloques()]
+
 function crearBloques() {
   plano.innerHTML = '';
   bloques = [];
   
-  // Posiciones iniciales basadas en la ubicación
+  // Variables para el sistema de arrastre
+  let isDragging = false;
+  let bloqueActivo = null;
+  let offsetX, offsetY;
+
+  // Manejadores de eventos globales
+  const handleMouseMove = (e) => {
+    if (!isDragging || !bloqueActivo || !modoEdicion) return;
+    
+    const rect = plano.getBoundingClientRect();
+    const leftPct = ((e.clientX - rect.left - offsetX) / rect.width) * 100;
+    const topPct = ((e.clientY - rect.top - offsetY) / rect.height) * 100;
+    
+    bloqueActivo.style.left = `${Math.max(0, Math.min(100, leftPct))}%`;
+    bloqueActivo.style.top = `${Math.max(0, Math.min(100, topPct))}%`;
+  };
+
+  const handleMouseUp = () => {
+    if (isDragging && bloqueActivo) {
+      isDragging = false;
+      bloqueActivo.style.cursor = 'grab';
+      
+      const index = bloqueActivo.dataset.index;
+      const leftPct = parseFloat(bloqueActivo.style.left);
+      const topPct = parseFloat(bloqueActivo.style.top);
+      
+      datos[index].leftPct = leftPct;
+      datos[index].topPct = topPct;
+      
+      db.collection('bloques').doc(index).update({
+        leftPct: leftPct,
+        topPct: topPct
+      });
+      
+      bloqueActivo = null;
+    }
+  };
+
+  // Configurar listeners globales una sola vez
+  document.removeEventListener('mousemove', handleMouseMove);
+  document.removeEventListener('mouseup', handleMouseUp);
+  document.addEventListener('mousemove', handleMouseMove);
+  document.addEventListener('mouseup', handleMouseUp);
+
+  // Posiciones iniciales
   const posiciones = ubicacionActual === 'taller' ? 
     [...Array(40)].map((_, i) => ({
-      left: 15 + (i % 7) * 12,  // Más espaciado horizontal
-      top: 20 + Math.floor(i / 7) * 12 // Más espaciado vertical
+      left: 15 + (i % 7) * 12,
+      top: 20 + Math.floor(i / 7) * 12
     })) : 
     [...Array(40)].map((_, i) => ({
-      left: 15 + (i % 6) * 14,  // Más espaciado para campa
+      left: 15 + (i % 6) * 14,
       top: 20 + Math.floor(i / 6) * 14
     }));
 
@@ -117,14 +164,35 @@ function crearBloques() {
     div.style.left = `${info.leftPct}%`;
     div.style.top = `${info.topPct}%`;
 
+    // Evento click para abrir modal (solo cuando no esté en modo edición)
+    div.addEventListener('click', (e) => {
+      if (!modoEdicion) {
+        e.stopPropagation();
+        abrirModal(div);
+      }
+    });
+
+    // Evento mousedown para arrastre (solo en modo edición)
+    div.addEventListener('mousedown', (e) => {
+      if (modoEdicion) {
+        e.stopPropagation();
+        isDragging = true;
+        bloqueActivo = div;
+        offsetX = e.offsetX;
+        offsetY = e.offsetY;
+        div.style.cursor = 'grabbing';
+      }
+    });
+
     plano.appendChild(div);
     bloques.push(div);
-
-    // Resto del código de eventos de arrastre...
   }
+  
   renderizarBloques();
   actualizarFondo();
 }
+
+// [El resto del código permanece igual]
 
 function actualizarFondo() {
   plano.classList.remove('taller', 'campa');
