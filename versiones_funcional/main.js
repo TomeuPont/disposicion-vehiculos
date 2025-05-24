@@ -239,7 +239,7 @@ function guardarDatos() {
 
   const indexActual = bloqueActual.dataset.index;
   
-  // Verificar duplicados (mantener tu código existente)
+  // Verificar duplicados (código existente)
   let bloqueExistente = null;
   let ubicacionExistente = '';
   
@@ -252,18 +252,13 @@ function guardarDatos() {
   }
 
   if (bloqueExistente !== null) {
-    // Mostrar mensaje de error (mantener tu código)
+    // Mostrar mensaje de error (código existente)
     return;
   }
 
-  // Obtener posición relativa al contenedor
-  const rect = plano.getBoundingClientRect();
-  const leftPx = bloqueActual.getBoundingClientRect().left - rect.left;
-  const topPx = bloqueActual.getBoundingClientRect().top - rect.top;
-  
-  // Convertir a porcentajes del contenedor
-  const leftPct = (leftPx / rect.width) * 100;
-  const topPct = (topPx / rect.height) * 100;
+  // Obtener posición ACTUAL del bloque (sin recálculos)
+  const leftPct = parseFloat(bloqueActual.style.left);
+  const topPct = parseFloat(bloqueActual.style.top);
   
   datos[indexActual] = {
     actividad: actividadInput.value,
@@ -298,15 +293,13 @@ function guardarDatos() {
     });
 }
 
+
 function liberarDatos() {
   const index = bloqueActual.dataset.index;
   
-  // Mantener la posición actual
-  const rect = plano.getBoundingClientRect();
-  const leftPx = bloqueActual.getBoundingClientRect().left - rect.left;
-  const topPx = bloqueActual.getBoundingClientRect().top - rect.top;
-  const leftPct = (leftPx / rect.width) * 100;
-  const topPct = (topPx / rect.height) * 100;
+  // Obtener posición ACTUAL del bloque (sin recálculos)
+  const leftPct = parseFloat(bloqueActual.style.left);
+  const topPct = parseFloat(bloqueActual.style.top);
 
   datos[index] = {
     actividad: '',
@@ -345,27 +338,30 @@ function renderizarBloques() {
   bloques.forEach((bloque) => {
     const i = parseInt(bloque.dataset.index);
     const info = datos[i];
+    
+    // Solo actualizar si los valores existen
     if (info.topPct !== undefined && info.leftPct !== undefined) {
-      bloque.style.top = info.topPct.toFixed(2) + '%';
-      bloque.style.left = info.leftPct.toFixed(2) + '%';
+      bloque.style.left = `${info.leftPct}%`;
+      bloque.style.top = `${info.topPct}%`;
     }
     
+    // Resto del código de renderizado...
     if (info.ocupado) {
-      // Cambios realizados aquí:
       if (info.terminado) {
-        bloque.style.backgroundColor = '#f00'; // Rojo para terminado
+        bloque.style.backgroundColor = '#f00';
       } else if (info.trabajador) {
-        bloque.style.backgroundColor = '#ff0'; // Amarillo para trabajando
+        bloque.style.backgroundColor = '#ff0';
       } else {
-        bloque.style.backgroundColor = '#8f8'; // Verde para asignado (sin cambios)
+        bloque.style.backgroundColor = '#8f8';
       }
       bloque.innerHTML = `<div style='font-size:14px; font-weight:bold;'>${info.actividad}</div>`;
     } else {
-      bloque.style.backgroundColor = '#ccc'; // Gris para no ocupado (sin cambios)
+      bloque.style.backgroundColor = '#ccc';
       bloque.innerHTML = ``;
     }
   });
 }
+
 
 closeModal.onclick = () => modal.style.display = 'none';
 
