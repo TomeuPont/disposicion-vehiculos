@@ -240,18 +240,18 @@ function guardarDatos() {
   const indexActual = bloqueActual.dataset.index;
   
   // Buscar si ya existe esta actividad en otro bloque
-  let actividadDuplicada = false;
+  let ubicacionDuplicado = null;
   
   for (let id in datos) {
     if (id !== indexActual && datos[id].actividad && parseInt(datos[id].actividad) === nuevaActividad) {
-      actividadDuplicada = true;
+      ubicacionDuplicado = id < 40 ? 'taller' : 'campa';
       break;
     }
   }
 
-  if (actividadDuplicada) {
+  if (ubicacionDuplicado) {
     const mensajeEstado = document.getElementById('mensajeEstado');
-    mensajeEstado.textContent = `¡El número de actividad ${nuevaActividad} ya existe!`;
+    mensajeEstado.textContent = `¡El número de actividad ${nuevaActividad} ya existe en el ${ubicacionDuplicado}!`;
     mensajeEstado.style.display = 'block';
     mensajeEstado.style.backgroundColor = '#ffcccc';
     
@@ -262,7 +262,7 @@ function guardarDatos() {
     return; // No permitir guardar
   }
 
-  // Obtener posición ACTUAL del bloque (sin recálculos)
+  // Resto de la función permanece igual...
   const leftPct = parseFloat(bloqueActual.style.left);
   const topPct = parseFloat(bloqueActual.style.top);
   
@@ -283,7 +283,6 @@ function guardarDatos() {
       renderizarBloques();
       modal.style.display = 'none';
       
-      // Mostrar mensaje de éxito
       const mensajeEstado = document.getElementById('mensajeEstado');
       mensajeEstado.textContent = `Actividad ${nuevaActividad} guardada correctamente.`;
       mensajeEstado.style.display = 'block';
