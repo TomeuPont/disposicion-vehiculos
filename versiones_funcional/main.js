@@ -251,7 +251,7 @@ function guardarDatos() {
 
   if (ubicacionDuplicado) {
     const mensajeEstado = document.getElementById('mensajeEstado');
-    mensajeEstado.textContent = `¡El número de actividad ${nuevaActividad} ya existe en el ${ubicacionDuplicado}!`;
+    mensajeEstado.textContent = `¡La actividad ${nuevaActividad} ya existe en ${ubicacionDuplicado}!`;
     mensajeEstado.style.display = 'block';
     mensajeEstado.style.backgroundColor = '#ffcccc';
     
