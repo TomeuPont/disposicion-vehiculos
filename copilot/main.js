@@ -234,7 +234,6 @@ function guardarDatos() {
   };
   
   db.collection('bloques').doc(indexActual).set(datos[indexActual]);
-  renderizarBloques();
   modal.style.display = 'none';
   
   // Mostrar mensaje de éxito
