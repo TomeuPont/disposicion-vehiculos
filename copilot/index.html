@@ -8,7 +8,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 </head>
 <body>
-
 <div class="panel-lateral">
   <button onclick="alternarUbicacion()" id="btnUbicacion">Campa</button>
   <div style="position: relative; display: inline-block;">
@@ -20,7 +19,11 @@
   </div>
 </div>
 
-<div class="plano-container" id="plano"></div>
+<div class="plano-container" id="plano">
+  <!-- Nueva imagen de fondo -->
+  <img id="plano-fondo-img" class="plano-fondo-img" src="plano-fondo.png" draggable="false" alt="Plano fondo" />
+  <!-- Los bloques se añaden aquí vía JS -->
+</div>
 
 <!-- Modal principal -->
 <div class="modal" id="modal" style="display: none;">
