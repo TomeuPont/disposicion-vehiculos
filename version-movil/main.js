@@ -529,5 +529,19 @@ document.getElementById('btnFullscreen').addEventListener('click', () => {
   }
 });
 
+function shouldHideFullscreenButton() {
+  // Detecta modo standalone (incluye iOS y Android)
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true // iOS antiguo
+  );
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  if (shouldHideFullscreenButton()) {
+    const btn = document.getElementById('btnFullscreen');
+    if (btn) btn.style.display = 'none';
+  }
+});
 // Ejecutar cada 24 horas
 setInterval(monitorizarCalidadDatos, 86400000);
