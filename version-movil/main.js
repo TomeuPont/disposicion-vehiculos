@@ -518,5 +518,16 @@ function monitorizarCalidadDatos() {
   });
 }
 
+document.getElementById('btnFullscreen').addEventListener('click', () => {
+  const elem = document.documentElement; // O .plano-container si prefieres solo el plano
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.webkitRequestFullscreen) { // Safari
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) { // IE11
+    elem.msRequestFullscreen();
+  }
+});
+
 // Ejecutar cada 24 horas
 setInterval(monitorizarCalidadDatos, 86400000);
