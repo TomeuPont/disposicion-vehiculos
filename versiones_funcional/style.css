@@ -27,41 +27,32 @@ body {
 }
 
 .plano-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-size: cover;
-  background-repeat: no-repeat;
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 75%; /* Relación de aspecto 4:3 para taller */
   overflow: hidden;
-  margin: 0;
-  padding: 0;
-  background-color: #f0f0f0;
 }
-
 
 .plano-container.taller {
   background-image: url('plano-fondo.png');
-  background-position: center 70%; /* Ajustado para taller */
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .plano-container.campa {
   background-image: url('plano-campa.png');
-  background-position: center 30%; /* Ajustado para campa */
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding-bottom: 85%; /* Relación diferente para campa */
 }
 
 .bloque {
   position: absolute;
-  width: 7vmin;  /* Aumentado de 4vmin a 7vmin */
-  height: 7vmin; /* Aumentado de 4vmin a 7vmin */
-  min-width: 40px; /* Aumentado de 30px */
-  min-height: 40px; /* Aumentado de 30px */
-  max-width: 90px; /* Aumentado de 70px */
-  max-height: 90px; /* Aumentado de 70px */
-  background-color: rgba(204, 204, 204, 0.8);
-  border: 2px solid #000;
-  border-radius: 8px; /* Aumentado ligeramente */
+  width: 8%; /* Ajustado al tamaño de los espacios */
+  height: 8%;
   transform: translate(-50%, -50%);
   display: flex;
   justify-content: center;
