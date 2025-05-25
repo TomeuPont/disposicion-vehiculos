@@ -72,7 +72,7 @@ function mostrarConfiguracion() {
 }
 
 function crearBloques() {
-  plano.innerHTML = '';
+  [...plano.querySelectorAll('.bloque')].forEach(el => el.remove());
   bloques = [];
   const posiciones = ubicacionActual === 'taller' ? posicionesTaller : posicionesCampa;
   for (let i = 0; i < 40; i++) {
