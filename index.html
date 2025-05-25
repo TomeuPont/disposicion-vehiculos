@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Plano Taller Camiones</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<div class="panel-lateral">
+  <button onclick="alternarUbicacion()" id="btnUbicacion">Campa</button>
+  <div style="position: relative; display: inline-block;">
+    <button onclick="mostrarConfiguracion()" id="botonConfiguracion">⚙️ Configuración</button>
+    <div id="menuConfiguracion" style="display: none;">
+      <button onclick="alternarModo()">Activar modo edición</button><br><br>
+      <button onclick="confirmarReseteo()">Resetear todos los bloques</button><br><br>
+      <button id="btnGestionTrabajadores">Gestionar trabajadores</button>    </div>
+  </div>
+</div>
+
+<div class="plano-container" id="plano">
+  <img id="plano-fondo-img" class="plano-fondo-img" src="plano-fondo.png" draggable="false" alt="Plano fondo" />
+  <!-- Los bloques se añaden aquí vía JS -->
+</div>
+  
+<!-- Modal principal -->
+<div class="modal" id="modal" style="display: none;">
+  <div class="modal-content">
+    <span class="close" id="closeModal">&times;</span>
+    <h3>Editar Bloque</h3>
+    <input type="number" id="actividad" placeholder="Nº Actividad" min="1">
+    <input type="text" id="matricula" placeholder="Matrícula">
+    <input type="text" id="marca" placeholder="Marca">
+    <input type="text" id="cliente" placeholder="Cliente">
+    <!-- Cambiar el select trabajador a: -->
+    <select id="trabajador" style="width: 100%; margin-bottom: 10px; padding: 8px;">
+      <option value="">Seleccionar trabajador...</option>
+      <!-- Las opciones se cargarán dinámicamente -->
+    </select>   
+      <label style="display: flex; align-items: center; gap: 5px;">
+      <input type="checkbox" id="terminado">
+      Terminado
+    </label>
+    <div style="margin-top: 15px; display: flex; gap: 10px;">
+      <button onclick="guardarDatos()">Guardar</button>
+      <button onclick="liberarDatos()">Liberar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal trabajadores -->
+<div class="modal" id="modalTrabajadores" style="display: none;">
+  <div class="modal-content" style="width: 400px;">
+    <span class="close" onclick="cerrarModalTrabajadores()">&times;</span>
+    <h3>Gestión de Trabajadores</h3>
+    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+      <!-- REEMPLAZA EL INPUT ACTUAL POR ESTE NUEVO CÓDIGO -->
+      <input type="text" id="nuevoTrabajador" 
+             placeholder="Nombre trabajador" 
+             pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{2,50}" 
+             title="Solo letras y espacios (2-50 caracteres)"
+             required
+             style="flex-grow: 1; text-transform: uppercase;" 
+             oninput="this.value = this.value.toUpperCase()">
+      <!-- FIN DEL NUEVO CÓDIGO -->
+      <button onclick="agregarTrabajador()">Añadir</button>
+    </div>
+    <ul id="listaTrabajadores" style="list-style: none; padding: 0; max-height: 300px; overflow-y: auto;"></ul>
+  </div>
+</div>
+  
+<div id="mensajeEstado" style="display: none;">Estado</div>
+<div class="version">
+  Versión 1.9.29
+  <div class="leyenda-colores">
+  <span class="color-muestra libre"></span> Libre
+  <span class="color-muestra ocupado"></span> Ocupado
+  <span class="color-muestra trabajando"></span> Trabajando
+  <span class="color-muestra terminado"></span> Terminado
+</div></div>
+
+<script src="main.js"></script>
+</body>
+</html>
