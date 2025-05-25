@@ -12,7 +12,7 @@ body {
   max-width: 1200px;
   margin: 50px auto 0 auto;
   aspect-ratio: 16/9; /* Ajusta si tu imagen tiene otra proporción */
-  background: #222;
+  /*background: #222;*/
   border: 2px solid #333;
   overflow: hidden;
   touch-action: none;
