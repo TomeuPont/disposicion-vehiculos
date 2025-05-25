@@ -25,9 +25,14 @@ body {
   object-fit: cover;
   user-select: none;
   pointer-events: none;
-  z-index: 0;
+  z-index: 0; 
+}
 
-  object-position: center 20%;  /* Ajusta el % según necesites */  
+.plano-fondo-img.campa {
+  object-position: center 20%; /* o el % que necesites */
+}
+.plano-fondo-img.taller {
+  object-position: center center;
 }
 
 .bloque {
