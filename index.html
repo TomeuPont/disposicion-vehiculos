@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Plano interactivo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Opcional: PWA meta tags para mejor experiencia móvil -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    .plano-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      max-width: 100vw;
+      max-height: 100vh;
+      background: #111;
+      overflow: hidden;
+    }
+    .plano-fondo-img {
+      position: absolute;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      user-select: none;
+      pointer-events: none;
+      z-index: 0;
+      object-position: center center;
+    }
+    #btnFullscreen {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 1000;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      background: #333;
+      color: #fff;
+      font-size: 15px;
+      opacity: 0.8;
+    }
+    #btnFullscreen:active {
+      opacity: 1;
+      background: #555;
+    }
+    /* Mejoras para móvil */
+    @media (max-width: 600px) {
+      .plano-container {
+        width: 100vw;
+        height: 100vh;
+        max-width: 100vw;
+        max-height: 100vh;
+        margin: 0;
+        border-radius: 0;
+        aspect-ratio: unset;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="plano-container" id="plano">
+    <button id="btnFullscreen">Pantalla completa</button>
+    <img id="plano-fondo-img" class="plano-fondo-img" src="plano-fondo.png" draggable="false" alt="Plano fondo" />
+    <!-- Aquí van los bloques y demás contenido dinámico -->
+  </div>
+  <script>
+    document.getElementById('btnFullscreen').addEventListener('click', function() {
+      const elem = document.documentElement;
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.webkitRequestFullscreen) { // Safari
+        elem.webkitRequestFullscreen();
+      } else if (elem.msRequestFullscreen) { // IE11
+        elem.msRequestFullscreen();
+      }
+    });
+  </script>
+</body>
+</html>
