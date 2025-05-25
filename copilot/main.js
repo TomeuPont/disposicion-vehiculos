@@ -476,18 +476,21 @@ function actualizarSelectTrabajadores() {
   });
 }
 
+
 window.onload = async () => {
-  // Cargar bloques primero
-  db.collection("bloques").get().then((querySnapshot) => {
+  db.collection("bloques").onSnapshot((querySnapshot) => {
+    datos = {};
     querySnapshot.forEach((doc) => {
       datos[doc.id] = doc.data();
     });
     crearBloques();
   });
-  
-  // Luego cargar trabajadores y esperar a que termine
+
+  // El resto igual (trabajadores por ejemplo)
   await cargarTrabajadores();
 };
+
+
 ;
 
 // Añade esta función para verificar periódicamente la calidad de los datos
