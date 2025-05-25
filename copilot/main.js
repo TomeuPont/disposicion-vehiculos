@@ -140,11 +140,27 @@ function crearBloques() {
   actualizarFondo();
 }
 
+
+// NUEVO: cambia la imagen según la ubicación
 function actualizarFondo() {
-  plano.classList.remove('taller', 'campa');
-  plano.classList.add(ubicacionActual);
-  plano.style.backgroundImage = `url('${ubicacionActual === 'taller' ? 'plano-fondo.png' : 'plano-campa.png'}')`;
+  const img = document.getElementById('plano-fondo-img');
+  if (!img) return;
+  if (ubicacionActual === 'taller') {
+    img.src = 'plano-fondo.png';
+    img.alt = 'Plano taller';
+  } else {
+    img.src = 'plano-campa.png';
+    img.alt = 'Plano campa';
+  }
 }
+
+// Los bloques ya se crean como hijos de #plano, que ahora tiene un <img> como fondo
+
+// No necesitas cambiar la lógica de posiciones, solo asegúrate de que plano-container y la imagen tengan siempre el mismo tamaño (lo hace aspect-ratio)
+// Los bloques usan left/top en % sobre .plano-container, así que la alineación será perfecta sin importar el dispositivo.
+
+// ... (El resto del código igual) ...
+
 
 function abrirModal(bloque) {
   bloqueActual = bloque;
