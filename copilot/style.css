@@ -26,6 +26,8 @@ body {
   user-select: none;
   pointer-events: none;
   z-index: 0;
+
+  object-position: center 20%;  /* Ajusta el % según necesites */  
 }
 
 .bloque {
