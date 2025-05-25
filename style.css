@@ -5,6 +5,14 @@ body {
   height: 100vh;
 }
 
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  touch-action: none;
+}
+
 /* Mantener proporción del plano, por ejemplo 16:9 (ajusta según tu imagen) */
 .plano-container {
   position: relative;
