@@ -29,10 +29,7 @@ body {
 }
 
 .plano-fondo-img.campa {
-  object-position: center 20%; /* o el % que necesites */
-}
-.plano-fondo-img.taller {
-  object-position: center center;
+  object-position: center 30%;
 }
 
 .bloque {
