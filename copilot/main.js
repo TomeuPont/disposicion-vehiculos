@@ -141,18 +141,20 @@ function crearBloques() {
 }
 
 
-// NUEVO: cambia la imagen según la ubicación
 function actualizarFondo() {
   const img = document.getElementById('plano-fondo-img');
-  if (!img) return;
+  img.classList.remove('campa', 'taller');
   if (ubicacionActual === 'taller') {
     img.src = 'plano-fondo.png';
     img.alt = 'Plano taller';
+    img.classList.add('taller');
   } else {
     img.src = 'plano-campa.png';
     img.alt = 'Plano campa';
+    img.classList.add('campa');
   }
 }
+
 
 // Los bloques ya se crean como hijos de #plano, que ahora tiene un <img> como fondo
 
