@@ -26,65 +26,55 @@ const closeModal = document.getElementById('closeModal');
 const listaTrabajadores = document.getElementById('listaTrabajadores');
 const posicionesTaller = [...Array(40)].map((_, i) => ({top: 300 + (i % 5) * 60, left: 400 + Math.floor(i / 5) * 60}));
 const posicionesCampa = [...Array(40)].map((_, i) => ({top: 100 + (i % 5) * 60, left: 100 + Math.floor(i / 5) * 60}));
-
-function alternarUbicacion() {
-  ubicacionActual = ubicacionActual === 'taller' ? 'campa' : 'taller';
-  botonUbicacion.textContent = ubicacionActual === 'taller' ? 'Campa' : 'Taller';
-  crearBloques();
-}
-
-function alternarModo() {
-  modoEdicion = !modoEdicion;
-  const btn = document.querySelector('#menuConfiguracion button:first-child');
-  if (btn) {
-    btn.textContent = modoEdicion ? 'Desactivar modo edición' : 'Activar modo edición';
+const configPosiciones = {
+  taller: {
+    columnas: 7,
+    filas: 6,
+    inicioX: 12, // % desde izquierda
+    inicioY: 15, // % desde arriba
+    espacioX: 12, // % entre columnas
+    espacioY: 10  // % entre filas
+  },
+  campa: {
+    columnas: 6,
+    filas: 7,
+    inicioX: 10,
+    inicioY: 12,
+    espacioX: 14,
+    espacioY: 8
   }
-  
-  // Feedback visual del modo edición
-  if (modoEdicion) {
-    plano.style.outline = '2px dashed #4CAF50';
-  } else {
-    plano.style.outline = 'none';
-  }
-}
-
-
-function confirmarReseteo() {
-  const pass = prompt('Introduce la contraseña para resetear todos los bloques:');
-  if (pass === 'patata') {
-    if (confirm('¿Estás seguro de que quieres resetear todos los bloques? Esta acción no se puede deshacer.')) {
-      datos = {};
-      for (let i = 0; i < 80; i++) {
-        datos[i] = {
-          actividad: '',
-          cliente: '',
-          trabajador: '',
-          matricula: '',
-          marca: '',
-          ocupado: false,
-          topPct: 90,
-          leftPct: 90
-        };
-        db.collection('bloques').doc(i.toString()).set(datos[i]);
-      }
-      crearBloques();
-    }
-  } else {
-    alert('Contraseña incorrecta.');
-  }
-}
-
-function mostrarConfiguracion() {
-  const menu = document.getElementById('menuConfiguracion');
-  menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
-}
-
-
-// [El resto del código permanece igual hasta la función crearBloques()]
+};
 
 function crearBloques() {
   plano.innerHTML = '';
   bloques = [];
+  
+  const config = ubicacionActual === 'taller' ? configPosiciones.taller : configPosiciones.campa;
+
+  for (let i = 0; i < 40; i++) {
+    const div = document.createElement('div');
+    div.className = 'bloque';
+    const globalIndex = ubicacionActual === 'taller' ? i : i + 40;
+    div.dataset.index = globalIndex;
+
+    // Calcular posición basada en la configuración
+    const col = i % config.columnas;
+    const fila = Math.floor(i / config.columnas);
+    const left = config.inicioX + (col * config.espacioX);
+    const top = config.inicioY + (fila * config.espacioY);
+
+    if (!datos[globalIndex]) {
+      datos[globalIndex] = {
+        // ...otros campos...
+        topPct: top,
+        leftPct: left
+      };
+    }
+
+    // Aplicar posición
+    div.style.left = `${datos[globalIndex].leftPct || left}%`;
+    div.style.top = `${datos[globalIndex].topPct || top}%`;
+
   
   // Variables para el sistema de arrastre
   let isDragging = false;
@@ -192,7 +182,64 @@ function crearBloques() {
   actualizarFondo();
 }
 
-// [El resto del código permanece igual]
+    
+  
+}
+
+
+
+
+function alternarUbicacion() {
+  ubicacionActual = ubicacionActual === 'taller' ? 'campa' : 'taller';
+  botonUbicacion.textContent = ubicacionActual === 'taller' ? 'Campa' : 'Taller';
+  crearBloques();
+}
+
+function alternarModo() {
+  modoEdicion = !modoEdicion;
+  const btn = document.querySelector('#menuConfiguracion button:first-child');
+  if (btn) {
+    btn.textContent = modoEdicion ? 'Desactivar modo edición' : 'Activar modo edición';
+  }
+  
+  // Feedback visual del modo edición
+  if (modoEdicion) {
+    plano.style.outline = '2px dashed #4CAF50';
+  } else {
+    plano.style.outline = 'none';
+  }
+}
+
+
+function confirmarReseteo() {
+  const pass = prompt('Introduce la contraseña para resetear todos los bloques:');
+  if (pass === 'patata') {
+    if (confirm('¿Estás seguro de que quieres resetear todos los bloques? Esta acción no se puede deshacer.')) {
+      datos = {};
+      for (let i = 0; i < 80; i++) {
+        datos[i] = {
+          actividad: '',
+          cliente: '',
+          trabajador: '',
+          matricula: '',
+          marca: '',
+          ocupado: false,
+          topPct: 90,
+          leftPct: 90
+        };
+        db.collection('bloques').doc(i.toString()).set(datos[i]);
+      }
+      crearBloques();
+    }
+  } else {
+    alert('Contraseña incorrecta.');
+  }
+}
+
+function mostrarConfiguracion() {
+  const menu = document.getElementById('menuConfiguracion');
+  menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
+}
 
 function actualizarFondo() {
   plano.classList.remove('taller', 'campa');
