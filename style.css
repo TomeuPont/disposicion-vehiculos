@@ -254,7 +254,13 @@ select {
   z-index: 2001;
 }
 
+
+
 @media (max-width: 600px) {
+  body {
+    margin: 0;
+    padding: 0;
+  }
   .plano-container {
     width: 100vw;
     height: 100vh;
@@ -262,5 +268,16 @@ select {
     max-height: 100vh;
     margin: 0;
     border-radius: 0;
+    aspect-ratio: unset;
+  }
+  .bloque {
+    width: 8vw;
+    height: 8vw;
+    min-width: 25px;
+    min-height: 25px;
+    max-width: 50px;
+    max-height: 50px;
+    font-size: 9px;
   }
 }
+
