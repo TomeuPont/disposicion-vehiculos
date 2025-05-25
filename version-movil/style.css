@@ -1,34 +1,53 @@
+
+
 html, body {
   height: 100%;
   margin: 0;
   padding: 0;
   overflow: hidden;
 }
-.plano-container {
-  width: 100vw;
-  height: 100vh;
-  max-width: 100vw;
-  max-height: 100vh;
-}
-
 body {
   margin: 0;
   font-family: Arial, sans-serif;
   height: 100vh;
 }
-
-/* Mantener proporción del plano, por ejemplo 16:9 (ajusta según tu imagen) */
 .plano-container {
   position: relative;
   width: 90vw;
   max-width: 1200px;
   margin: 50px auto 0 auto;
-  aspect-ratio: 16/9; /* Ajusta si tu imagen tiene otra proporción */
-  /*background: #222;*/
+  aspect-ratio: 16/9; /* Ajusta aquí según tu imagen */
   border: 2px solid #333;
   overflow: hidden;
   touch-action: none;
 }
+
+/* ... resto igual ... */
+
+@media (max-width: 600px) {
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  .plano-container {
+    width: 100vw;
+    max-width: 100vw;
+    aspect-ratio: 16/9;  /* ¡NO LO QUITES! */
+    margin: 0;
+    border-radius: 0;
+    /* Elimina height, max-height, y aspect-ratio: unset */
+  }
+  .bloque {
+    width: 8vw;
+    height: 8vw;
+    min-width: 25px;
+    min-height: 25px;
+    max-width: 50px;
+    max-height: 50px;
+    font-size: 9px;
+  }
+}
+
 
 .plano-fondo-img {
   position: absolute;
@@ -268,28 +287,4 @@ select {
 
 
 
-@media (max-width: 600px) {
-  body {
-    margin: 0;
-    padding: 0;
-  }
-  .plano-container {
-    width: 100vw;
-    height: 100vh;
-    max-width: 100vw;
-    max-height: 100vh;
-    margin: 0;
-    border-radius: 0;
-    aspect-ratio: unset;
-  }
-  .bloque {
-    width: 8vw;
-    height: 8vw;
-    min-width: 25px;
-    min-height: 25px;
-    max-width: 50px;
-    max-height: 50px;
-    font-size: 9px;
-  }
-}
 
