@@ -1,8 +1,12 @@
 const firebaseConfig = {
   apiKey: "AIzaSyCQ_bC88QCFloRDHDVPP__9elcmW51pDqk",
   authDomain: "planos-taller-campa.firebaseapp.com",
-  projectId: "planos-taller-campa"
+  projectId: "planos-taller-campa",
+  storageBucket: "planos-taller-campa.firebasestorage.app",
+  messagingSenderId: "813627250056",
+  appId: "1:813627250056:web:76ecd6f3be6be23690d63d"
 };
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
