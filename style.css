@@ -37,16 +37,22 @@ body {
     border-radius: 0;
     /* Elimina height, max-height, y aspect-ratio: unset */
   }
-  .bloque {
-    width: 8vw;
-    height: 8vw;
-    min-width: 25px;
-    min-height: 25px;
-    max-width: 50px;
-    max-height: 50px;
-    font-size: 9px;
-  }
+
+  :root {
+  --tamano-bloque: 4vw; /* Valor inicial */
 }
+
+.bloque {
+  position: absolute;
+  width: var(--tamano-bloque);
+  height: var(--tamano-bloque);
+  min-width: 30px;
+  min-height: 30px;
+  max-width: 70px;
+  max-height: 70px;
+  font-size: 9px;
+}
+
 
 
 .plano-fondo-img {
