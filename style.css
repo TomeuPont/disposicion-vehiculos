@@ -61,6 +61,27 @@ body {
   object-position: center 30%;
 }
 
+.panel-lateral {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 9999;
+}
+
+#menuConfiguracion {
+  display: none;
+  position: absolute;
+  top: 35px;
+  left: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 6px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.2);
+  z-index: 10000;
+}
+
+
 .bloque {
   position: absolute;
   width: var(--tamano-bloque);
@@ -86,30 +107,14 @@ body {
   z-index: 10;
 }
 
-.panel-lateral {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 3000;
-}
+
 .panel-lateral button {
   margin-right: 8px;
   padding: 8px 12px;
   font-size: 13px;
   cursor: pointer;
 }
-#menuConfiguracion {
-  display: none;
-  position: absolute;
-  top: 35px;
-  left: 0;
-  background: #fff;
-  border: 1px solid #ccc;
-  padding: 10px;
-  border-radius: 6px;
-  box-shadow: 0 0 6px rgba(0,0,0,0.2);
-  z-index: 3100;
-}
+
 
 .modal {
   display: none;
