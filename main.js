@@ -191,6 +191,7 @@ function crearBloques() {
     
   }
   renderizarBloques();
+  actualizarLeyendaContador();
   actualizarFondo();
 }
 
