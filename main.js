@@ -636,3 +636,24 @@ function actualizarLeyendaContador() {
     <span class="color-muestra terminado"></span> Terminado <b>(${conteo.terminado})</b>
   `;
 }
+
+// Tamaño de bloque: valor por defecto y guardado en localStorage
+const tamanoBloqueInput = document.getElementById('tamanoBloque');
+const tamanoBloqueValor = document.getElementById('tamanoBloqueValor');
+let tamanoBloque = parseInt(localStorage.getItem('tamanoBloque') || 4);
+
+function actualizarBloquesCSS() {
+  // Cambia el tamaño base de los bloques usando una variable CSS
+  document.documentElement.style.setProperty('--tamano-bloque', tamanoBloque + 'vw');
+}
+if (tamanoBloqueInput) {
+  tamanoBloqueInput.value = tamanoBloque;
+  tamanoBloqueValor.textContent = tamanoBloque;
+  tamanoBloqueInput.addEventListener('input', (e) => {
+    tamanoBloque = parseInt(e.target.value);
+    tamanoBloqueValor.textContent = tamanoBloque;
+    localStorage.setItem('tamanoBloque', tamanoBloque);
+    actualizarBloquesCSS();
+  });
+}
+actualizarBloquesCSS();
