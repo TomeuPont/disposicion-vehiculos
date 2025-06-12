@@ -588,17 +588,14 @@ function shouldHideFullscreenButton() {
 setInterval(monitorizarCalidadDatos, 86400000);
 
 function actualizarTotalVehiculos() {
-  // Calcula los totales para taller y campa por separado
   function totalZona(zona) {
     let total = 0;
     const offset = zona === 'taller' ? 0 : 40;
     for (let i = offset; i < offset + 40; i++) {
       const info = datos[i];
-      // verde, amarillo, rojo = ocupado sin trabajador ni terminado, ocupado con trabajador, ocupado terminado
       if (info && info.ocupado) {
-        if (info.terminado || info.trabajador || (!info.terminado && !info.trabajador)) {
-          total++;
-        }
+        // ocupados = verde(ocupado), amarillo(trabajando), rojo(terminado)
+        total++;
       }
     }
     return total;
