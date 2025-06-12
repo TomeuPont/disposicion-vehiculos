@@ -35,7 +35,8 @@ function alternarUbicacion() {
   ubicacionActual = ubicacionActual === 'taller' ? 'campa' : 'taller';
   botonUbicacion.textContent = ubicacionActual === 'taller' ? 'Campa' : 'Taller';
   crearBloques();
-  actualizarFondo();}
+  actualizarFondo();
+}
 
 function alternarModo() {
   modoEdicion = !modoEdicion;
@@ -140,10 +141,6 @@ function crearBloques() {
       }
     });
 
-
-        // --- Dentro del bucle que crea cada div.bloque ---
-    // ... listeners de click y mouse (como ya tienes) ...
-
     // Eventos táctiles (soporte móvil/tablet)
     div.addEventListener('touchstart', function(e) {
       if (!modoEdicion) return;
@@ -186,15 +183,11 @@ function crearBloques() {
       }
       e.preventDefault();
     }, { passive: false });
-    
-
-    
   }
   renderizarBloques();
   actualizarLeyendaContador();
   actualizarFondo();
 }
-
 
 function actualizarFondo() {
   const img = document.getElementById('plano-fondo-img');
@@ -210,15 +203,6 @@ function actualizarFondo() {
   }
 }
 
-
-// Los bloques ya se crean como hijos de #plano, que ahora tiene un <img> como fondo
-
-// No necesitas cambiar la lógica de posiciones, solo asegúrate de que plano-container y la imagen tengan siempre el mismo tamaño (lo hace aspect-ratio)
-// Los bloques usan left/top en % sobre .plano-container, así que la alineación será perfecta sin importar el dispositivo.
-
-// ... (El resto del código igual) ...
-
-
 function abrirModal(bloque) {
   bloqueActual = bloque;
   const index = bloque.dataset.index;
@@ -228,7 +212,7 @@ function abrirModal(bloque) {
   trabajadorInput.value = info.trabajador;
   matriculaInput.value = info.matricula;
   marcaInput.value = info.marca;
-  terminadoInput.checked = info.terminado || false; // Añadir esta línea
+  terminadoInput.checked = info.terminado || false;
   modal.style.display = 'flex';
 }
 function guardarDatos() {
@@ -240,7 +224,6 @@ function guardarDatos() {
 
   const indexActual = bloqueActual.dataset.index;
   
-  // Buscar si ya existe esta actividad en otro bloque
   let bloqueExistente = null;
   let ubicacionExistente = '';
   
@@ -254,28 +237,22 @@ function guardarDatos() {
 
   if (bloqueExistente !== null) {
     const mensaje = `¡El número de actividad ${nuevaActividad} ya existe en ${ubicacionExistente} (Bloque ${parseInt(bloqueExistente)+1}).`;
-    
-    // Mostrar mensaje en el div de estado
     const mensajeEstado = document.getElementById('mensajeEstado');
     mensajeEstado.textContent = mensaje;
     mensajeEstado.style.display = 'block';
     mensajeEstado.style.backgroundColor = '#ffcccc';
-    
-    // Ocultar después de 5 segundos
     setTimeout(() => {
       mensajeEstado.style.display = 'none';
     }, 5000);
-    
-    return; // No permitir guardar
+    return;
   }
 
-  // Continuar con el guardado normal si no hay duplicados
   const rect = plano.getBoundingClientRect();
   const topPx = bloqueActual.getBoundingClientRect().top - rect.top;
   const leftPx = bloqueActual.getBoundingClientRect().left - rect.left;
   const topPct = (topPx / plano.offsetHeight) * 100;
   const leftPct = (leftPx / plano.offsetWidth) * 100;
-  
+
   datos[indexActual] = {
     actividad: actividadInput.value,
     cliente: clienteInput.value,
@@ -291,20 +268,16 @@ function guardarDatos() {
   db.collection('bloques').doc(indexActual).set(datos[indexActual]);
   modal.style.display = 'none';
   
-  // Mostrar mensaje de éxito
   const mensajeEstado = document.getElementById('mensajeEstado');
   mensajeEstado.textContent = `Actividad ${nuevaActividad} guardada correctamente.`;
   mensajeEstado.style.display = 'block';
   mensajeEstado.style.backgroundColor = '#ccffcc';
-  
   setTimeout(() => {
     mensajeEstado.style.display = 'none';
   }, 3000);
 }
 function liberarDatos() {
   const index = bloqueActual.dataset.index;
-  
-  // Obtener la posición actual antes de liberar
   const rect = plano.getBoundingClientRect();
   const topPx = bloqueActual.getBoundingClientRect().top - rect.top;
   const leftPx = bloqueActual.getBoundingClientRect().left - rect.left;
@@ -319,21 +292,18 @@ function liberarDatos() {
     marca: '',
     terminado: false,
     ocupado: false,
-    topPct: topPct,  // Mantener la posición X
-    leftPct: leftPct // Mantener la posición Y
+    topPct: topPct,
+    leftPct: leftPct
   };
 
   db.collection('bloques').doc(index).set(datos[index])
     .then(() => {
       renderizarBloques();
       modal.style.display = 'none';
-      
-      // Mostrar mensaje de éxito
       const mensajeEstado = document.getElementById('mensajeEstado');
       mensajeEstado.textContent = 'Bloque liberado correctamente.';
       mensajeEstado.className = 'success';
       mensajeEstado.style.display = 'block';
-      
       setTimeout(() => {
         mensajeEstado.style.display = 'none';
       }, 3000);
@@ -351,257 +321,23 @@ function renderizarBloques() {
       bloque.style.top = info.topPct.toFixed(2) + '%';
       bloque.style.left = info.leftPct.toFixed(2) + '%';
     }
-    
     if (info.ocupado) {
-      // Cambios realizados aquí:
       if (info.terminado) {
-        bloque.style.backgroundColor = '#f00'; // Rojo para terminado
+        bloque.style.backgroundColor = '#f00';
       } else if (info.trabajador) {
-        bloque.style.backgroundColor = '#ff0'; // Amarillo para trabajando
+        bloque.style.backgroundColor = '#ff0';
       } else {
-        bloque.style.backgroundColor = '#8f8'; // Verde para asignado (sin cambios)
+        bloque.style.backgroundColor = '#8f8';
       }
       bloque.innerHTML = `<div style='font-size:14px; font-weight:bold;'>${info.actividad}</div>`;
     } else {
-      bloque.style.backgroundColor = '#ccc'; // Gris para no ocupado (sin cambios)
+      bloque.style.backgroundColor = '#ccc';
       bloque.innerHTML = ``;
     }
   });
 }
 
-closeModal.onclick = () => modal.style.display = 'none';
-
-function mostrarGestionTrabajadores() {
-  const modal = document.getElementById('modalTrabajadores');
-  const lista = document.getElementById('listaTrabajadores');
-  
-  // Limpiar lista actual
-  lista.innerHTML = '';
-  
-  // Mostrar mensaje si no hay trabajadores
-  if (trabajadores.length === 0) {
-    lista.innerHTML = '<li style="color: #777; padding: 10px; text-align: center;">No hay trabajadores registrados</li>';
-  } else {
-    // Ordenar y mostrar trabajadores
-    trabajadores.sort().forEach(trabajador => {
-      const li = document.createElement('li');
-      li.innerHTML = `
-        <span>${trabajador}</span>
-        <button class="btn-eliminar-trabajador" data-nombre="${trabajador}">Eliminar</button>
-      `;
-      lista.appendChild(li);
-    });
-  }
-  
-  // Mostrar modal y ocultar menú configuración
-  modal.style.display = 'flex';
-  document.getElementById('menuConfiguracion').style.display = 'none';
-}
-
-// Modificar el event listener para el botón
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('btnGestionTrabajadores').addEventListener('click', mostrarGestionTrabajadores);
-  
-  // Delegación de eventos para los botones eliminar
-  document.getElementById('listaTrabajadores').addEventListener('click', (e) => {
-    if (e.target.classList.contains('btn-eliminar-trabajador')) {
-      eliminarTrabajador(e.target.dataset.nombre);
-    }
-  });
-});
-
-function cerrarModalTrabajadores() {
-  document.getElementById('modalTrabajadores').style.display = 'none';
-}
-
-function agregarTrabajador() {
-  const input = document.getElementById('nuevoTrabajador');
-  const nombre = input.value.trim().toUpperCase(); // Convertir a mayúsculas
-  
-  if (nombre && !trabajadores.includes(nombre)) {
-    db.collection("trabajadores").add({
-      nombre: nombre
-    }).then(() => {
-      // Actualizar la lista inmediatamente después de añadir
-      trabajadores.push(nombre);
-      actualizarSelectTrabajadores();
-      mostrarGestionTrabajadores();
-      input.value = '';
-      
-      // Mostrar mensaje de éxito
-      const mensajeEstado = document.getElementById('mensajeEstado');
-      mensajeEstado.textContent = `TRABAJADOR ${nombre} AÑADIDO CORRECTAMENTE.`;
-      mensajeEstado.className = 'success';
-      mensajeEstado.style.display = 'block';
-      
-      setTimeout(() => {
-        mensajeEstado.style.display = 'none';
-      }, 3000);
-    }).catch(error => {
-      console.error("Error al añadir trabajador: ", error);
-      alert("ERROR AL AÑADIR TRABAJADOR");
-    });
-  } else if (trabajadores.includes(nombre)) {
-    alert('ESTE TRABAJADOR YA EXISTE');
-  }
-}
-
-function eliminarTrabajador(nombre) {
-  if (confirm(`¿Eliminar al trabajador ${nombre}?`)) {
-    db.collection("trabajadores")
-      .where("nombre", "==", nombre)
-      .get()
-      .then((querySnapshot) => {
-        const eliminaciones = [];
-        querySnapshot.forEach((doc) => {
-          eliminaciones.push(doc.ref.delete());
-        });
-        return Promise.all(eliminaciones);
-      })
-      .then(() => {
-        trabajadores = trabajadores.filter(t => t !== nombre);
-        actualizarSelectTrabajadores();
-        mostrarGestionTrabajadores(); // Actualizar la vista
-        
-        // Mostrar mensaje de éxito
-        const mensajeEstado = document.getElementById('mensajeEstado');
-        mensajeEstado.textContent = `Trabajador ${nombre} eliminado correctamente.`;
-        mensajeEstado.className = 'success';
-        mensajeEstado.style.display = 'block';
-        
-        setTimeout(() => {
-          mensajeEstado.style.display = 'none';
-        }, 3000);
-      })
-      .catch((error) => {
-        console.error("Error al eliminar trabajador: ", error);
-        alert("Error al eliminar trabajador");
-      });
-  }
-}
-
-function cargarTrabajadores() {
-  return new Promise((resolve) => {
-    db.collection("trabajadores").get().then((querySnapshot) => {
-      trabajadores = [];
-      querySnapshot.forEach((doc) => {
-        const trabajadorData = doc.data();
-        // Verificar que el campo 'nombre' existe y no es null/undefined
-        if (trabajadorData.nombre && typeof trabajadorData.nombre === 'string') {
-          const nombre = trabajadorData.nombre.toUpperCase();
-          trabajadores.push(nombre);
-          
-          // Actualizar en Firebase si no estaba en mayúsculas
-          if (trabajadorData.nombre !== nombre) {
-            doc.ref.update({ nombre: nombre });
-          }
-        } else {
-          console.warn(`Documento ${doc.id} no tiene un nombre válido:`, trabajadorData);
-        }
-      });
-      actualizarSelectTrabajadores();
-      resolve();
-    }).catch(error => {
-      console.error("Error cargando trabajadores:", error);
-      resolve();
-    });
-  });
-}
-
-function actualizarSelectTrabajadores() {
-  const select = document.getElementById('trabajador');
-  
-  // Limpiar select manteniendo la primera opción por defecto
-  while (select.options.length > 1) {
-    select.remove(1);
-  }
-  
-  if (trabajadores.length === 0) {
-    console.warn("No hay trabajadores válidos cargados");
-    return;
-  }
-  
-  // Ordenar alfabéticamente y añadir opciones
-  trabajadores.sort().forEach(trabajador => {
-    if (trabajador && typeof trabajador === 'string') {
-      const option = new Option(trabajador, trabajador);
-      select.add(option);
-    }
-  });
-}
-
-
-window.onload = async () => {
-  db.collection("bloques").onSnapshot((querySnapshot) => {
-    datos = {};
-    querySnapshot.forEach((doc) => {
-      datos[doc.id] = doc.data();
-    });
-    crearBloques();
-  });
-
-  // El resto igual (trabajadores por ejemplo)
-  await cargarTrabajadores();
-};
-
-
-;
-
-// Añade esta función para verificar periódicamente la calidad de los datos
-function monitorizarCalidadDatos() {
-  db.collection("trabajadores").get().then((querySnapshot) => {
-    const reporte = {
-      total: querySnapshot.size,
-      invalidos: 0,
-      detalles: []
-    };
-    
-    querySnapshot.forEach((doc) => {
-      if (!doc.data().nombre || typeof doc.data().nombre !== 'string') {
-        reporte.invalidos++;
-        reporte.detalles.push({
-          id: doc.id,
-          data: doc.data()
-        });
-      }
-    });
-    
-    if (reporte.invalidos > 0) {
-      console.warn("Documentos inválidos detectados:", reporte);
-      // Opcional: enviar notificación por email o a un canal de Slack
-    }
-  });
-}
-
-document.getElementById('btnFullscreen').addEventListener('click', () => {
-  const elem = document.documentElement; // O .plano-container si prefieres solo el plano
-  if (elem.requestFullscreen) {
-    elem.requestFullscreen();
-  } else if (elem.webkitRequestFullscreen) { // Safari
-    elem.webkitRequestFullscreen();
-  } else if (elem.msRequestFullscreen) { // IE11
-    elem.msRequestFullscreen();
-  }
-});
-
-function shouldHideFullscreenButton() {
-  // Detecta modo standalone (incluye iOS y Android)
-  return (
-    window.matchMedia('(display-mode: standalone)').matches ||
-    window.navigator.standalone === true // iOS antiguo
-  );
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-  if (shouldHideFullscreenButton()) {
-    const btn = document.getElementById('btnFullscreen');
-    if (btn) btn.style.display = 'none';
-  }
-});
-// Ejecutar cada 24 horas
-setInterval(monitorizarCalidadDatos, 86400000);
-
-// === LEYENDA CON CONTADOR DE BLOQUES POR ESTADO ===
+// --- Leyenda con contador de bloques por estado ---
 function contarBloquesPorEstado(datos, ubicacion) {
   const conteo = {
     libre: 0,
@@ -637,23 +373,215 @@ function actualizarLeyendaContador() {
   `;
 }
 
-// Tamaño de bloque: valor por defecto y guardado en localStorage
-const tamanoBloqueInput = document.getElementById('tamanoBloque');
-const tamanoBloqueValor = document.getElementById('tamanoBloqueValor');
-let tamanoBloque = parseInt(localStorage.getItem('tamanoBloque') || 4);
+closeModal.onclick = () => modal.style.display = 'none';
 
-function actualizarBloquesCSS() {
-  // Cambia el tamaño base de los bloques usando una variable CSS
-  document.documentElement.style.setProperty('--tamano-bloque', tamanoBloque + 'vw');
+function mostrarGestionTrabajadores() {
+  const modal = document.getElementById('modalTrabajadores');
+  const lista = document.getElementById('listaTrabajadores');
+  lista.innerHTML = '';
+  if (trabajadores.length === 0) {
+    lista.innerHTML = '<li style="color: #777; padding: 10px; text-align: center;">No hay trabajadores registrados</li>';
+  } else {
+    trabajadores.sort().forEach(trabajador => {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <span>${trabajador}</span>
+        <button class="btn-eliminar-trabajador" data-nombre="${trabajador}">Eliminar</button>
+      `;
+      lista.appendChild(li);
+    });
+  }
+  modal.style.display = 'flex';
+  document.getElementById('menuConfiguracion').style.display = 'none';
 }
-if (tamanoBloqueInput) {
-  tamanoBloqueInput.value = tamanoBloque;
-  tamanoBloqueValor.textContent = tamanoBloque;
-  tamanoBloqueInput.addEventListener('input', (e) => {
-    tamanoBloque = parseInt(e.target.value);
-    tamanoBloqueValor.textContent = tamanoBloque;
-    localStorage.setItem('tamanoBloque', tamanoBloque);
-    actualizarBloquesCSS();
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btnGestionTrabajadores').addEventListener('click', mostrarGestionTrabajadores);
+  document.getElementById('listaTrabajadores').addEventListener('click', (e) => {
+    if (e.target.classList.contains('btn-eliminar-trabajador')) {
+      eliminarTrabajador(e.target.dataset.nombre);
+    }
+  });
+
+  // --- Slider tamaño bloques ---
+  if (document.getElementById('tamanoBloque')) {
+    initTamanoSlider();
+  }
+
+  if (shouldHideFullscreenButton()) {
+    const btn = document.getElementById('btnFullscreen');
+    if (btn) btn.style.display = 'none';
+  }
+});
+
+function initTamanoSlider() {
+  const slider = document.getElementById('tamanoBloque');
+  const valor = document.getElementById('tamanoBloqueValor');
+  let tamano = parseInt(localStorage.getItem('tamanoBloque') || slider.value || 4);
+  slider.value = tamano;
+  valor.textContent = tamano;
+  document.documentElement.style.setProperty('--tamano-bloque', tamano + 'vw');
+  slider.addEventListener('input', (e) => {
+    tamano = parseInt(e.target.value);
+    valor.textContent = tamano;
+    document.documentElement.style.setProperty('--tamano-bloque', tamano + 'vw');
+    localStorage.setItem('tamanoBloque', tamano);
   });
 }
-actualizarBloquesCSS();
+
+function cerrarModalTrabajadores() {
+  document.getElementById('modalTrabajadores').style.display = 'none';
+}
+
+function agregarTrabajador() {
+  const input = document.getElementById('nuevoTrabajador');
+  const nombre = input.value.trim().toUpperCase();
+  if (nombre && !trabajadores.includes(nombre)) {
+    db.collection("trabajadores").add({
+      nombre: nombre
+    }).then(() => {
+      trabajadores.push(nombre);
+      actualizarSelectTrabajadores();
+      mostrarGestionTrabajadores();
+      input.value = '';
+      const mensajeEstado = document.getElementById('mensajeEstado');
+      mensajeEstado.textContent = `TRABAJADOR ${nombre} AÑADIDO CORRECTAMENTE.`;
+      mensajeEstado.className = 'success';
+      mensajeEstado.style.display = 'block';
+      setTimeout(() => {
+        mensajeEstado.style.display = 'none';
+      }, 3000);
+    }).catch(error => {
+      console.error("Error al añadir trabajador: ", error);
+      alert("ERROR AL AÑADIR TRABAJADOR");
+    });
+  } else if (trabajadores.includes(nombre)) {
+    alert('ESTE TRABAJADOR YA EXISTE');
+  }
+}
+
+function eliminarTrabajador(nombre) {
+  if (confirm(`¿Eliminar al trabajador ${nombre}?`)) {
+    db.collection("trabajadores")
+      .where("nombre", "==", nombre)
+      .get()
+      .then((querySnapshot) => {
+        const eliminaciones = [];
+        querySnapshot.forEach((doc) => {
+          eliminaciones.push(doc.ref.delete());
+        });
+        return Promise.all(eliminaciones);
+      })
+      .then(() => {
+        trabajadores = trabajadores.filter(t => t !== nombre);
+        actualizarSelectTrabajadores();
+        mostrarGestionTrabajadores();
+        const mensajeEstado = document.getElementById('mensajeEstado');
+        mensajeEstado.textContent = `Trabajador ${nombre} eliminado correctamente.`;
+        mensajeEstado.className = 'success';
+        mensajeEstado.style.display = 'block';
+        setTimeout(() => {
+          mensajeEstado.style.display = 'none';
+        }, 3000);
+      })
+      .catch((error) => {
+        console.error("Error al eliminar trabajador: ", error);
+        alert("Error al eliminar trabajador");
+      });
+  }
+}
+
+function cargarTrabajadores() {
+  return new Promise((resolve) => {
+    db.collection("trabajadores").get().then((querySnapshot) => {
+      trabajadores = [];
+      querySnapshot.forEach((doc) => {
+        const trabajadorData = doc.data();
+        if (trabajadorData.nombre && typeof trabajadorData.nombre === 'string') {
+          const nombre = trabajadorData.nombre.toUpperCase();
+          trabajadores.push(nombre);
+          if (trabajadorData.nombre !== nombre) {
+            doc.ref.update({ nombre: nombre });
+          }
+        } else {
+          console.warn(`Documento ${doc.id} no tiene un nombre válido:`, trabajadorData);
+        }
+      });
+      actualizarSelectTrabajadores();
+      resolve();
+    }).catch(error => {
+      console.error("Error cargando trabajadores:", error);
+      resolve();
+    });
+  });
+}
+
+function actualizarSelectTrabajadores() {
+  const select = document.getElementById('trabajador');
+  while (select.options.length > 1) {
+    select.remove(1);
+  }
+  if (trabajadores.length === 0) {
+    console.warn("No hay trabajadores válidos cargados");
+    return;
+  }
+  trabajadores.sort().forEach(trabajador => {
+    if (trabajador && typeof trabajador === 'string') {
+      const option = new Option(trabajador, trabajador);
+      select.add(option);
+    }
+  });
+}
+
+window.onload = async () => {
+  db.collection("bloques").onSnapshot((querySnapshot) => {
+    datos = {};
+    querySnapshot.forEach((doc) => {
+      datos[doc.id] = doc.data();
+    });
+    crearBloques();
+  });
+  await cargarTrabajadores();
+};
+
+function monitorizarCalidadDatos() {
+  db.collection("trabajadores").get().then((querySnapshot) => {
+    const reporte = {
+      total: querySnapshot.size,
+      invalidos: 0,
+      detalles: []
+    };
+    querySnapshot.forEach((doc) => {
+      if (!doc.data().nombre || typeof doc.data().nombre !== 'string') {
+        reporte.invalidos++;
+        reporte.detalles.push({
+          id: doc.id,
+          data: doc.data()
+        });
+      }
+    });
+    if (reporte.invalidos > 0) {
+      console.warn("Documentos inválidos detectados:", reporte);
+    }
+  });
+}
+
+document.getElementById('btnFullscreen').addEventListener('click', () => {
+  const elem = document.documentElement;
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.webkitRequestFullscreen) {
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) {
+    elem.msRequestFullscreen();
+  }
+});
+
+function shouldHideFullscreenButton() {
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true
+  );
+}
+
+setInterval(monitorizarCalidadDatos, 86400000);
