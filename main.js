@@ -601,25 +601,38 @@ window.addEventListener('DOMContentLoaded', () => {
 // Ejecutar cada 24 horas
 setInterval(monitorizarCalidadDatos, 86400000);
 
-function contarBloquesPorColor(bloques, zonaActual) {
-  const conteo = {};
-  let total = 0;
-  bloques.forEach(bloque => {
-    if (bloque.zona === zonaActual) {
-      conteo[bloque.color] = (conteo[bloque.color] || 0) + 1;
-      total++;
+// === LEYENDA CON CONTADOR DE BLOQUES POR ESTADO ===
+function contarBloquesPorEstado(datos, ubicacion) {
+  const conteo = {
+    libre: 0,
+    ocupado: 0,
+    trabajando: 0,
+    terminado: 0,
+  };
+  const offset = ubicacion === 'taller' ? 0 : 40;
+  for (let i = offset; i < offset + 40; i++) {
+    const info = datos[i];
+    if (!info || !info.ocupado) {
+      conteo.libre++;
+    } else if (info.terminado) {
+      conteo.terminado++;
+    } else if (info.trabajador) {
+      conteo.trabajando++;
+    } else {
+      conteo.ocupado++;
     }
-  });
-  return { conteo, total };
+  }
+  return conteo;
 }
 
-function renderizarLeyenda(bloques, zonaActual) {
-  const { conteo, total } = contarBloquesPorColor(bloques, zonaActual);
-  let leyendaHtml = `<b>Total: ${total}</b><br>`;
-  for (const color in conteo) {
-    // Puedes poner un cuadradito de color usando un span con background-color:
-    leyendaHtml += `<span style="display:inline-block;width:16px;height:16px;background:${color};margin-right:4px;border:1px solid #000"></span> `;
-    leyendaHtml += `${color}: <b>${conteo[color]}</b><br>`;
-  }
-  document.getElementById("leyenda").innerHTML = leyendaHtml;
+function actualizarLeyendaContador() {
+  const leyenda = document.querySelector('.leyenda-colores');
+  if (!leyenda) return;
+  const conteo = contarBloquesPorEstado(datos, ubicacionActual);
+  leyenda.innerHTML = `
+    <span class="color-muestra libre"></span> Libre <b>(${conteo.libre})</b>
+    <span class="color-muestra ocupado"></span> Ocupado <b>(${conteo.ocupado})</b>
+    <span class="color-muestra trabajando"></span> Trabajando <b>(${conteo.trabajando})</b>
+    <span class="color-muestra terminado"></span> Terminado <b>(${conteo.terminado})</b>
+  `;
 }
