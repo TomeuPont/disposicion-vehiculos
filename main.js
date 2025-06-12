@@ -599,3 +599,26 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 // Ejecutar cada 24 horas
 setInterval(monitorizarCalidadDatos, 86400000);
+
+function contarBloquesPorColor(bloques, zonaActual) {
+  const conteo = {};
+  let total = 0;
+  bloques.forEach(bloque => {
+    if (bloque.zona === zonaActual) {
+      conteo[bloque.color] = (conteo[bloque.color] || 0) + 1;
+      total++;
+    }
+  });
+  return { conteo, total };
+}
+
+function renderizarLeyenda(bloques, zonaActual) {
+  const { conteo, total } = contarBloquesPorColor(bloques, zonaActual);
+  let leyendaHtml = `<b>Total: ${total}</b><br>`;
+  for (const color in conteo) {
+    // Puedes poner un cuadradito de color usando un span con background-color:
+    leyendaHtml += `<span style="display:inline-block;width:16px;height:16px;background:${color};margin-right:4px;border:1px solid #000"></span> `;
+    leyendaHtml += `${color}: <b>${conteo[color]}</b><br>`;
+  }
+  document.getElementById("leyenda").innerHTML = leyendaHtml;
+}
