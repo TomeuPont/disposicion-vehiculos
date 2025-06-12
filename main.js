@@ -35,7 +35,7 @@ function alternarUbicacion() {
   ubicacionActual = ubicacionActual === 'taller' ? 'campa' : 'taller';
   botonUbicacion.textContent = ubicacionActual === 'taller' ? 'Campa' : 'Taller';
   crearBloques();
-}
+  actualizarFondo();}
 
 function alternarModo() {
   modoEdicion = !modoEdicion;
