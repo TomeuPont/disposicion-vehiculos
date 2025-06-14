@@ -1,0 +1,312 @@
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+.panel-lateral button {
+  margin-right: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+#menuConfiguracion {
+  display: none;
+  position: absolute;
+  top: 35px;
+  left: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 6px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.2);
+  z-index: 1000;
+}
+
+.plano-container {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 75%; /* Relación de aspecto 4:3 para taller */
+  overflow: hidden;
+}
+
+.plano-container.taller {
+  background-image: url('plano-fondo.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.plano-container.campa {
+  background-image: url('plano-campa.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding-bottom: 85%; /* Relación diferente para campa */
+}
+
+.bloque {
+  position: absolute;
+  width: 8%; /* Ajustado al tamaño de los espacios */
+  height: 8%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px; /* Aumentado de 14px */
+  font-weight: bold;
+  z-index: 10;
+  box-shadow: 0 0 8px rgba(0,0,0,0.6); /* Sombra más pronunciada */
+  transition: all 0.2s ease;
+  cursor: grab;
+  touch-action: none; /* Importante para dispositivos táctiles */
+  user-select: none;
+}
+
+.bloque:active {
+  transform: translate(-50%, -50%) scale(1.1);
+  z-index: 20;
+  box-shadow: 0 0 15px rgba(0,0,0,0.8);
+  cursor: grabbing;
+}
+
+/* Estados de los bloques */
+.bloque[data-ocupado="true"] { 
+  background-color: rgba(136, 255, 136, 0.9); 
+  font-size: 18px; /* Texto más grande cuando está ocupado */
+}
+.bloque[data-trabajando="true"] { 
+  background-color: rgba(255, 255, 0, 0.9);
+  font-size: 18px;
+}
+.bloque[data-terminado="true"] { 
+  background-color: rgba(255, 0, 0, 0.9);
+  font-size: 18px;
+}
+
+/* Efecto al arrastrar */
+.bloque.grabbing {
+  cursor: grabbing;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  z-index: 20;
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+}
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 300px;
+}
+.modal-content input {
+  width: 100%;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+.close {
+  float: right;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#mensajeEstado {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  padding: 10px 15px;
+  border-radius: 6px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.2);
+  font-size: 14px;
+  display: none;
+  z-index: 1000;
+  max-width: 300px;
+  text-align: center;
+}
+
+/* Puedes mantener los colores que ya tenías o usar estos */
+#mensajeEstado.error {
+  background-color: #ffebee;
+  color: #c62828;
+  border-left: 4px solid #c62828;
+}
+
+#mensajeEstado.success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-left: 4px solid #2e7d32;
+
+}
+  .version {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: #222;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: monospace;
+  z-index: 20;
+}
+
+/*
+.plano-container.taller {
+  background-position: center;
+}
+
+.plano-container.campa {
+  background-position: center 20%;
+}
+*/
+
+.bloque.terminado {
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
+}
+
+.modal-content input[type="checkbox"] {
+  width: auto;
+  margin: 0 5px 0 0;
+}
+
+.modal-content label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.panel-lateral {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+  background-color: rgba(255,255,255,0.8);
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.version {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  background-color: rgba(0,0,0,0.7);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+
+.leyenda-colores {
+  display: flex;
+  gap: 10px;
+  font-size: 11px;
+  color: #ddd;
+  flex-wrap: wrap;
+}
+
+.color-muestra {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  margin-right: 2px;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.color-muestra.libre {
+  background-color: #ccc;
+}
+
+.color-muestra.ocupado {
+  background-color: #8f8;
+}
+
+.color-muestra.trabajando {
+  background-color: #ff0; /* Amarillo */
+}
+
+.color-muestra.terminado {
+  background-color: #f00; /* Rojo */
+}
+
+/* Estilos para la gestión de trabajadores */
+#listaTrabajadores li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+}
+
+#listaTrabajadores li button {
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+#listaTrabajadores li button:hover {
+  background: #cc0000;
+}
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 14px;
+}
+
+/* Asegurar que los modales tienen z-index alto */
+.modal {
+  z-index: 2000;
+}
+
+#modalTrabajadores {
+  z-index: 2001;
+}
+
+/* Añadir al final del archivo */
+
+/* Mejoras para interacción con bloques */
+.bloque {
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  touch-action: none; /* Importante para dispositivos táctiles */
+}
+
+.bloque.grabbing {
+  transform: translate(-50%, -50%) scale(1.05);
+  box-shadow: 0 0 15px rgba(0,0,0,0.7);
+  z-index: 100;
+}
+
+/* Feedback visual para modo edición */
+.modo-edicion .bloque {
+  outline: 2px dashed rgba(76, 175, 80, 0.5);
+}
+
+/* Mejorar visibilidad de modales */
+.modal {
+  z-index: 1000;
+}
+.modal-content {
+  z-index: 1001;
+}
