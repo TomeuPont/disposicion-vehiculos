@@ -277,13 +277,12 @@ function guardarDatos() {
     mensajeEstado.style.display = 'none';
   }, 3000);
 }
+
 function liberarDatos() {
   const index = bloqueActual.dataset.index;
-  const rect = plano.getBoundingClientRect();
-  const topPx = bloqueActual.getBoundingClientRect().top - rect.top;
-  const leftPx = bloqueActual.getBoundingClientRect().left - rect.left;
-  const topPct = (topPx / plano.offsetHeight) * 100;
-  const leftPct = (leftPx / plano.offsetWidth) * 100;
+  // Esquina inferior derecha (por ejemplo: top: 90%, left: 90%)
+  const topPct = 90;
+  const leftPct = 90;
 
   datos[index] = {
     actividad: '',
