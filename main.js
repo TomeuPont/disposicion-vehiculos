@@ -350,8 +350,16 @@ function contarBloquesPorEstado(datos, ubicacion) {
     trabajando: 0,
     terminado: 0,
   };
-  const offset = ubicacion === 'taller' ? 0 : 40;
-  for (let i = offset; i < offset + 40; i++) {
+  // Nuevos rangos:
+  let start, end;
+  if (ubicacion === 'taller') {
+    start = 0;
+    end = 49; // 50 bloques: 0-49
+  } else {
+    start = 50;
+    end = 89; // 40 bloques: 50-89
+  }
+  for (let i = start; i <= end; i++) {
     const info = datos[i];
     if (!info || !info.ocupado) {
       conteo.libre++;
@@ -365,6 +373,7 @@ function contarBloquesPorEstado(datos, ubicacion) {
   }
   return conteo;
 }
+
 
 function actualizarLeyendaContador() {
   const leyenda = document.querySelector('.leyenda-colores');
