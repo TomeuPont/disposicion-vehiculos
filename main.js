@@ -28,7 +28,7 @@ const terminadoInput = document.getElementById('terminado');
 const botonUbicacion = document.getElementById('btnUbicacion');
 const closeModal = document.getElementById('closeModal');
 const listaTrabajadores = document.getElementById('listaTrabajadores');
-const posicionesTaller = [...Array(40)].map((_, i) => ({top: 300 + (i % 5) * 60, left: 400 + Math.floor(i / 5) * 60}));
+const posicionesTaller = [...Array(50)].map((_, i) => ({top: 300 + (i % 5) * 60, left: 400 + Math.floor(i / 5) * 60}));
 const posicionesCampa = [...Array(40)].map((_, i) => ({top: 100 + (i % 5) * 60, left: 100 + Math.floor(i / 5) * 60}));
 
 function alternarUbicacion() {
@@ -51,7 +51,7 @@ function confirmarReseteo() {
   if (pass === 'patata') {
     if (confirm('¿Estás seguro de que quieres resetear todos los bloques? Esta acción no se puede deshacer.')) {
       datos = {};
-      for (let i = 0; i < 80; i++) {
+      for (let i = 0; i < 90; i++) {
         datos[i] = {
           actividad: '',
           cliente: '',
@@ -79,11 +79,15 @@ function mostrarConfiguracion() {
 function crearBloques() {
   [...plano.querySelectorAll('.bloque')].forEach(el => el.remove());
   bloques = [];
+  // Definir número de bloques y offset según la ubicación
+  const numBloques = ubicacionActual === 'taller' ? 50 : 40;
+  const offset = ubicacionActual === 'taller' ? 0 : 50;
   const posiciones = ubicacionActual === 'taller' ? posicionesTaller : posicionesCampa;
-  for (let i = 0; i < 40; i++) {
+
+  for (let i = 0; i < numBloques; i++) {
     const div = document.createElement('div');
     div.className = 'bloque';
-    const globalIndex = ubicacionActual === 'taller' ? i : i + 40;
+    const globalIndex = i + offset;
     div.dataset.index = globalIndex;
 
     if (!datos[globalIndex]) datos[globalIndex] = {actividad: '', cliente: '', trabajador: '', matricula: '', marca: '', ocupado: false};
@@ -185,10 +189,11 @@ function crearBloques() {
     }, { passive: false });
   }
   renderizarBloques();
-  actualizarLeyendaContador();
-  actualizarTotalVehiculos();
+  if (typeof actualizarLeyendaContador === "function") actualizarLeyendaContador();
+  if (typeof actualizarTotalVehiculos === "function") actualizarTotalVehiculos();
   actualizarFondo();
 }
+
 
 function actualizarFondo() {
   const img = document.getElementById('plano-fondo-img');
