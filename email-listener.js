@@ -161,29 +161,34 @@ async function terminarBloquePorActividad(actividadId) {
   return found;
 }
 
-async function liberarBloquePorActividad(actividadId) {
-  // Busca en todos los bloques el que coincida con actividad y libéralo
-  const snapshot = await db.collection("bloques").get();
-  let found = false;
-  for (const doc of snapshot.docs) {
-    const data = doc.data();
-    if (data.actividad && String(data.actividad) === String(actividadId) && data.ocupado) {
-      await db.collection("bloques").doc(doc.id).set({
-        ...data,
-        actividad: '',
-        cliente: '',
-        trabajador: '',
-        matricula: '',
-        marca: '',
-        terminado: false,
-        ocupado: false
-      });
-      found = true;
-      break; // Solo el primero que encuentre
+async function liberarBloquePorActividad(actividadId, zona) {
+    // zona: "taller" o "campa" o undefined para buscar en todos
+    let startIdx = 0, endIdx = 89;
+    if(zona === "taller") { startIdx = 0; endIdx = 49; }
+    else if(zona === "campa") { startIdx = 50; endIdx = 89; }
+    const snapshot = await db.collection("bloques").get();
+    let found = false;
+    for (const doc of snapshot.docs) {
+      const data = doc.data();
+      const idx = parseInt(doc.id);
+      if (idx >= startIdx && idx <= endIdx && data.actividad && String(data.actividad) === String(actividadId) && data.ocupado) {
+        await db.collection("bloques").doc(doc.id).set({
+          ...data,
+          actividad: '',
+          cliente: '',
+          trabajador: '',
+          matricula: '',
+          marca: '',
+          terminado: false,
+          ocupado: false
+        });
+        found = true;
+        break;
+      }
     }
+    return found;
   }
-  return found;
-}
+
 
 // Reinicio automático en caso de error de conexión (ECONNRESET)
 mailListener.on("error", (err) => {
