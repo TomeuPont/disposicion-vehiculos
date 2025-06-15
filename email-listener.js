@@ -6,8 +6,6 @@ const nodemailer = require("nodemailer");
 const GMAIL_USER = "entradas.veh@gmail.com";
 const GMAIL_APP_PASSWORD = "nuhd jajn nrxm npfm";
 const GOOGLE_APPLICATION_CREDENTIALS = "planos-taller-campa-07f9aa4add0f.json";
-
-// Nuevo destinatario Trello
 const TRELLO_EMAIL = "tolopontripoll+v2p0bezd79oewls5lbpx@boards.trello.com";
 
 // Inicializa Firestore
@@ -16,7 +14,6 @@ const db = new Firestore({
   keyFilename: GOOGLE_APPLICATION_CREDENTIALS
 });
 
-// Nodemailer transporter para reenviar emails tal cual
 const forwardTransporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -33,6 +30,7 @@ async function forwardRawEmail(raw) {
   });
 }
 
+// IMPORTANTE: forzamos mailParserOptions y attachments a false para intentar obtener mail.raw
 const mailListener = new MailListener({
   username: GMAIL_USER,
   password: GMAIL_APP_PASSWORD,
@@ -42,7 +40,9 @@ const mailListener = new MailListener({
   mailbox: "INBOX",
   markSeen: true,
   fetchUnreadOnStart: true,
-  tlsOptions: { rejectUnauthorized: false }
+  tlsOptions: { rejectUnauthorized: false },
+  mailParserOptions: { streamAttachments: false },
+  attachments: false
 });
 
 mailListener.start();
@@ -50,7 +50,7 @@ mailListener.start();
 mailListener.on("mail", async (mail, seqno, attributes) => {
   const subject = mail.subject || "";
 
-  // Soporta variantes como: Act: 123 #En_taller, Act 123 #En_taller, Act:123 #Finished, etc.
+  // Ahora incluye campa_out también
   const match = subject.match(/Act[:\s]+\s*(\d+)\s*#(En_taller|En_campa|Finished|taller_out|campa_out)/i);
 
   if (!match) {
@@ -58,7 +58,7 @@ mailListener.on("mail", async (mail, seqno, attributes) => {
   } else {
     const actividadId = match[1];
     const comando = match[2].toLowerCase();
-  
+
     try {
       if (comando === 'en_taller') {
         await rellenarPrimerBloqueLibre("taller", actividadId);
@@ -93,10 +93,11 @@ mailListener.on("mail", async (mail, seqno, attributes) => {
     }
   }
 
-  // Reenvía siempre el correo tal cual a Trello
-  if (mail.raw) {
+  // Mejor manejo del RAW: prueba mail.raw, luego attributes["body[]"]
+  const rawMessage = mail.raw || (attributes && attributes["body[]"]);
+  if (rawMessage) {
     try {
-      await forwardRawEmail(mail.raw);
+      await forwardRawEmail(rawMessage);
       console.log("Correo reenviado a Trello.");
     } catch (err) {
       console.error("Error reenviando a Trello:", err);
@@ -111,7 +112,6 @@ async function rellenarPrimerBloqueLibre(zona, actividadId) {
   const startIdx = zona === "taller" ? 0 : 50;
   const endIdx = zona === "taller" ? 49 : 89;
 
-  // 1. Cargar todos los bloques de la zona
   let bloques = [];
   const snapshot = await db.collection("bloques").get();
   snapshot.forEach(doc => {
@@ -121,30 +121,30 @@ async function rellenarPrimerBloqueLibre(zona, actividadId) {
     }
   });
 
-  // 2. Filtrar bloques libres
-  const libres = bloques.filter(b => !b.ocupado);
+  // Orden correcto: arriba (menor topPct), luego izquierda (menor leftPct)
+  bloques = bloques.filter(b => !b.ocupado);
+  if (bloques.length === 0) throw new Error("No hay bloques libres en " + zona);
 
-  if (libres.length === 0) throw new Error("No hay bloques libres en " + zona);
-
-  // 3. Elegir el más arriba (menor topPct), luego el más a la izquierda (menor leftPct)
-  libres.sort((a, b) => {
-    if (a.topPct !== undefined && b.topPct !== undefined && a.topPct !== b.topPct) return a.topPct - b.topPct;
-    if (a.leftPct !== undefined && b.leftPct !== undefined) return a.leftPct - b.leftPct;
-    return 0;
+  bloques.sort((a, b) => {
+    const topA = Number(a.topPct) || 0;
+    const topB = Number(b.topPct) || 0;
+    const leftA = Number(a.leftPct) || 0;
+    const leftB = Number(b.leftPct) || 0;
+    if (topA !== topB) return topA - topB;
+    return leftA - leftB;
   });
-  const elegido = libres[0];
 
-  // 4. Actualizar el bloque elegido
+  const elegido = bloques[0];
+
   await db.collection("bloques").doc(elegido.id).set({
     ...elegido,
     actividad: actividadId,
     ocupado: true,
-    terminado: false // puedes ajustar esto según tu lógica
+    terminado: false
   });
 }
 
 async function terminarBloquePorActividad(actividadId) {
-  // Busca en todos los bloques el que coincida con actividad y márcalo terminado
   const snapshot = await db.collection("bloques").get();
   let found = false;
   for (const doc of snapshot.docs) {
@@ -155,40 +155,39 @@ async function terminarBloquePorActividad(actividadId) {
         terminado: true
       });
       found = true;
-      break; // Solo el primero que encuentre
+      break;
     }
   }
   return found;
 }
 
 async function liberarBloquePorActividad(actividadId, zona) {
-    // zona: "taller" o "campa" o undefined para buscar en todos
-    let startIdx = 0, endIdx = 89;
-    if(zona === "taller") { startIdx = 0; endIdx = 49; }
-    else if(zona === "campa") { startIdx = 50; endIdx = 89; }
-    const snapshot = await db.collection("bloques").get();
-    let found = false;
-    for (const doc of snapshot.docs) {
-      const data = doc.data();
-      const idx = parseInt(doc.id);
-      if (idx >= startIdx && idx <= endIdx && data.actividad && String(data.actividad) === String(actividadId) && data.ocupado) {
-        await db.collection("bloques").doc(doc.id).set({
-          ...data,
-          actividad: '',
-          cliente: '',
-          trabajador: '',
-          matricula: '',
-          marca: '',
-          terminado: false,
-          ocupado: false
-        });
-        found = true;
-        break;
-      }
+  // zona: "taller" o "campa"
+  let startIdx = 0, endIdx = 89;
+  if (zona === "taller") { startIdx = 0; endIdx = 49; }
+  else if (zona === "campa") { startIdx = 50; endIdx = 89; }
+  const snapshot = await db.collection("bloques").get();
+  let found = false;
+  for (const doc of snapshot.docs) {
+    const data = doc.data();
+    const idx = parseInt(doc.id);
+    if (idx >= startIdx && idx <= endIdx && data.actividad && String(data.actividad) === String(actividadId) && data.ocupado) {
+      await db.collection("bloques").doc(doc.id).set({
+        ...data,
+        actividad: '',
+        cliente: '',
+        trabajador: '',
+        matricula: '',
+        marca: '',
+        terminado: false,
+        ocupado: false
+      });
+      found = true;
+      break;
     }
-    return found;
   }
-
+  return found;
+}
 
 // Reinicio automático en caso de error de conexión (ECONNRESET)
 mailListener.on("error", (err) => {
