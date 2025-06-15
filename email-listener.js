@@ -52,7 +52,8 @@ mailListener.on("mail", async (mail, seqno, attributes) => {
 
   // Regex para detectar todos los comandos
   // Ejemplo: Act: 123 #En_taller   o   Act: 123 #Finished
-  const match = subject.match(/Act:\s*(\d+)\s*#(En_taller|En_campa|Finished|taller_out)/i);
+  const match = subject.match(/Act[:\s]+\s*(\d+)\s*#(En_taller|En_campa|Finished|taller_out)/i);
+
 
   if (!match) {
     console.log("Correo ignorado, asunto no válido:", subject);
