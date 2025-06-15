@@ -126,40 +126,40 @@ mailListener.on("mail", async (mail, seqno, attributes) => {
 });
 
 async function rellenarPrimerBloqueLibre(zona, actividadId) {
-  const startIdx = zona === "taller" ? 0 : 50;
-  const endIdx = zona === "taller" ? 49 : 89;
-
-  let bloques = [];
-  const snapshot = await db.collection("bloques").get();
-  snapshot.forEach(doc => {
-    const idx = parseInt(doc.id);
-    if (idx >= startIdx && idx <= endIdx) {
-      bloques.push({ id: doc.id, ...doc.data() });
-    }
-  });
-
-  bloques = bloques.filter(b => !b.ocupado);
-  if (bloques.length === 0) throw new Error("No hay bloques libres en " + zona);
-
-  // Orden descendente por topPct
-  bloques.sort((a, b) => {
-    const topA = Number(a.topPct) || 0;
-    const topB = Number(b.topPct) || 0;
-    const leftA = Number(a.leftPct) || 0;
-    const leftB = Number(b.leftPct) || 0;
-    if (topA !== topB) return topB - topA;
-    return leftA - leftB;
-  });
-
-  const elegido = bloques[0];
-
-  await db.collection("bloques").doc(elegido.id).set({
-    ...elegido,
-    actividad: actividadId,
-    ocupado: true,
-    terminado: false
-  });
-}
+    const startIdx = zona === "taller" ? 0 : 50;
+    const endIdx = zona === "taller" ? 49 : 89;
+  
+    let bloques = [];
+    const snapshot = await db.collection("bloques").get();
+    snapshot.forEach(doc => {
+      const idx = parseInt(doc.id);
+      if (idx >= startIdx && idx <= endIdx) {
+        bloques.push({ id: doc.id, ...doc.data() });
+      }
+    });
+  
+    bloques = bloques.filter(b => !b.ocupado);
+    if (bloques.length === 0) throw new Error("No hay bloques libres en " + zona);
+  
+    // ORDEN CORRECTO: arriba (menor topPct), luego izquierda (menor leftPct)
+    bloques.sort((a, b) => {
+      const topA = Number(a.topPct) || 0;
+      const topB = Number(b.topPct) || 0;
+      const leftA = Number(a.leftPct) || 0;
+      const leftB = Number(b.leftPct) || 0;
+      if (topA !== topB) return topA - topB;
+      return leftA - leftB;
+    });
+  
+    const elegido = bloques[0];
+  
+    await db.collection("bloques").doc(elegido.id).set({
+      ...elegido,
+      actividad: actividadId,
+      ocupado: true,
+      terminado: false,
+    });
+  }
 
 async function terminarBloquePorActividad(actividadId) {
   const snapshot = await db.collection("bloques").get();
