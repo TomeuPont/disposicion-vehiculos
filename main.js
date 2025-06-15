@@ -221,6 +221,11 @@ function abrirModal(bloque) {
   marcaInput.value = info.marca;
   terminadoInput.checked = info.terminado || false;
   modal.style.display = 'flex';
+  setTimeout(() => {
+    actividadInput.focus();
+    actividadInput.select();
+  }, 50);
+
 }
 function guardarDatos() {
   const nuevaActividad = parseInt(actividadInput.value);
