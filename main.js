@@ -401,6 +401,8 @@ function initTamanoSlider() {
   });
 }
 
+
+
 function cerrarModalTrabajadores() {
   document.getElementById('modalTrabajadores').style.display = 'none';
 }
