@@ -2,13 +2,11 @@ const MailListener = require("mail-listener2");
 const { Firestore } = require('@google-cloud/firestore');
 const nodemailer = require("nodemailer");
 
-// CONFIGURA ESTO:
 const GMAIL_USER = "entradas.veh@gmail.com";
 const GMAIL_APP_PASSWORD = "nuhd jajn nrxm npfm";
 const GOOGLE_APPLICATION_CREDENTIALS = "planos-taller-campa-07f9aa4add0f.json";
 const TRELLO_EMAIL = "tolopontripoll+v2p0bezd79oewls5lbpx@boards.trello.com";
 
-// Inicializa Firestore
 const db = new Firestore({
   projectId: "planos-taller-campa",
   keyFilename: GOOGLE_APPLICATION_CREDENTIALS
@@ -30,7 +28,16 @@ async function forwardRawEmail(raw) {
   });
 }
 
-// IMPORTANTE: forzamos mailParserOptions y attachments a false para intentar obtener mail.raw
+async function forwardMailReconstructed(mail) {
+  await forwardTransporter.sendMail({
+    to: TRELLO_EMAIL,
+    subject: mail.subject,
+    text: mail.text,
+    html: mail.html,
+    attachments: mail.attachments || []
+  });
+}
+
 const mailListener = new MailListener({
   username: GMAIL_USER,
   password: GMAIL_APP_PASSWORD,
@@ -50,8 +57,14 @@ mailListener.start();
 mailListener.on("mail", async (mail, seqno, attributes) => {
   const subject = mail.subject || "";
 
-  // Ahora incluye campa_out también
-  const match = subject.match(/Act[:\s]+\s*(\d+)\s*#(En_taller|En_campa|Finished|taller_out|campa_out)/i);
+  // DEBUG
+  console.log('DEBUG asunto:', subject);
+
+  // Regex más flexible
+  const match = subject.match(/Act[:\s]*\s*(\d+)\s*#(En_taller|En_campa|Finished|taller_out|campa_out)/i);
+
+  // DEBUG
+  console.log('DEBUG regex match:', match);
 
   if (!match) {
     console.log("Correo ignorado, asunto no válido:", subject);
@@ -93,7 +106,7 @@ mailListener.on("mail", async (mail, seqno, attributes) => {
     }
   }
 
-  // Mejor manejo del RAW: prueba mail.raw, luego attributes["body[]"]
+  // RAW handling, fallback to reconstructed
   const rawMessage = mail.raw || (attributes && attributes["body[]"]);
   if (rawMessage) {
     try {
@@ -103,12 +116,16 @@ mailListener.on("mail", async (mail, seqno, attributes) => {
       console.error("Error reenviando a Trello:", err);
     }
   } else {
-    console.error("No hay raw en el mail recibido, no se puede reenviar tal cual.");
+    try {
+      await forwardMailReconstructed(mail);
+      console.log("Correo reconstruido y reenviado a Trello (sin raw).");
+    } catch (err) {
+      console.error("No se pudo reenviar ni reconstruido:", err);
+    }
   }
 });
 
 async function rellenarPrimerBloqueLibre(zona, actividadId) {
-  // zona: "taller" o "campa"
   const startIdx = zona === "taller" ? 0 : 50;
   const endIdx = zona === "taller" ? 49 : 89;
 
@@ -121,16 +138,16 @@ async function rellenarPrimerBloqueLibre(zona, actividadId) {
     }
   });
 
-  // Orden correcto: arriba (menor topPct), luego izquierda (menor leftPct)
   bloques = bloques.filter(b => !b.ocupado);
   if (bloques.length === 0) throw new Error("No hay bloques libres en " + zona);
 
+  // Orden descendente por topPct
   bloques.sort((a, b) => {
     const topA = Number(a.topPct) || 0;
     const topB = Number(b.topPct) || 0;
     const leftA = Number(a.leftPct) || 0;
     const leftB = Number(b.leftPct) || 0;
-    if (topA !== topB) return topA - topB;
+    if (topA !== topB) return topB - topA;
     return leftA - leftB;
   });
 
@@ -162,7 +179,6 @@ async function terminarBloquePorActividad(actividadId) {
 }
 
 async function liberarBloquePorActividad(actividadId, zona) {
-  // zona: "taller" o "campa"
   let startIdx = 0, endIdx = 89;
   if (zona === "taller") { startIdx = 0; endIdx = 49; }
   else if (zona === "campa") { startIdx = 50; endIdx = 89; }
@@ -189,7 +205,6 @@ async function liberarBloquePorActividad(actividadId, zona) {
   return found;
 }
 
-// Reinicio automático en caso de error de conexión (ECONNRESET)
 mailListener.on("error", (err) => {
   console.error("Error en mail-listener:", err);
   setTimeout(() => {
