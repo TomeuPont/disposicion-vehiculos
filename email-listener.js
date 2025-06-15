@@ -50,10 +50,8 @@ mailListener.start();
 mailListener.on("mail", async (mail, seqno, attributes) => {
   const subject = mail.subject || "";
 
-  // Regex para detectar todos los comandos
-  // Ejemplo: Act: 123 #En_taller   o   Act: 123 #Finished
+  // Soporta variantes como: Act: 123 #En_taller, Act 123 #En_taller, Act:123 #Finished, etc.
   const match = subject.match(/Act[:\s]+\s*(\d+)\s*#(En_taller|En_campa|Finished|taller_out)/i);
-
 
   if (!match) {
     console.log("Correo ignorado, asunto no válido:", subject);
@@ -62,15 +60,15 @@ mailListener.on("mail", async (mail, seqno, attributes) => {
     const comando = match[2];
 
     try {
-      if (comando.match(/^en_taller$/i)) {
+      if (/^en_taller$/i.test(comando)) {
         // Igual que #taller: crea bloque en taller
         await rellenarPrimerBloqueLibre("taller", actividadId);
         console.log(`Bloque libre para taller (${actividadId}) actualizado.`);
-      } else if (comando.match(/^en_campa$/i)) {
+      } else if (/^en_campa$/i.test(comando)) {
         // Igual que #campa: crea bloque en campa
         await rellenarPrimerBloqueLibre("campa", actividadId);
         console.log(`Bloque libre para campa (${actividadId}) actualizado.`);
-      } else if (comando.match(/^finished$/i)) {
+      } else if (/^finished$/i.test(comando)) {
         // Buscar bloque con ese número de actividad y marcar terminado
         const ok = await terminarBloquePorActividad(actividadId);
         if (ok) {
@@ -78,7 +76,7 @@ mailListener.on("mail", async (mail, seqno, attributes) => {
         } else {
           console.log(`No se encontró bloque para terminar con actividad ${actividadId}.`);
         }
-      } else if (comando.match(/^taller_out$/i)) {
+      } else if (/^taller_out$/i.test(comando)) {
         // Buscar bloque con ese número de actividad y liberar
         const ok = await liberarBloquePorActividad(actividadId);
         if (ok) {
@@ -184,6 +182,16 @@ async function liberarBloquePorActividad(actividadId) {
   return found;
 }
 
+// Reinicio automático en caso de error de conexión (ECONNRESET)
 mailListener.on("error", (err) => {
   console.error("Error en mail-listener:", err);
+  setTimeout(() => {
+    try { mailListener.stop(); } catch (e) {}
+    try {
+      mailListener.start();
+      console.log("Reiniciando mail-listener...");
+    } catch (e) {
+      console.error("No se pudo reiniciar mail-listener:", e);
+    }
+  }, 5000);
 });
