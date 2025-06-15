@@ -603,15 +603,22 @@ function actualizarLeyendaContador() {
   `;
 }
 
+
 function actualizarTotalVehiculos() {
-  const conteoTaller = contarBloquesPorEstado(datos, 'taller');
-  const conteoCampa = contarBloquesPorEstado(datos, 'campa');
-  // Asegúrate de poner estos spans en tu HTML si quieres mostrar ambos:
-  // <span id="totalTaller"></span> <span id="totalCampa"></span>
-  if (document.getElementById('totalTaller')) {
-    document.getElementById('totalTaller').textContent = conteoTaller.ocupado + conteoTaller.trabajando + conteoTaller.terminado;
+  // TALLER: bloques 0-49, CAMPA: bloques 50-89
+  let totalTaller = 0;
+  let totalCampa = 0;
+  // Suma ocupados (incluye ocupado, trabajando y terminado)
+  for (let i = 0; i <= 49; i++) {
+    const info = datos[i];
+    if (info && info.ocupado) totalTaller++;
   }
-  if (document.getElementById('totalCampa')) {
-    document.getElementById('totalCampa').textContent = conteoCampa.ocupado + conteoCampa.trabajando + conteoCampa.terminado;
+  for (let i = 50; i <= 89; i++) {
+    const info = datos[i];
+    if (info && info.ocupado) totalCampa++;
+  }
+  const div = document.getElementById('totalVehiculos');
+  if (div) {
+    div.innerHTML = `Vehículos en <b>Taller</b>: ${totalTaller} &nbsp;|&nbsp; <b>Campa</b>: ${totalCampa}`;
   }
 }
