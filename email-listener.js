@@ -51,38 +51,41 @@ mailListener.on("mail", async (mail, seqno, attributes) => {
   const subject = mail.subject || "";
 
   // Soporta variantes como: Act: 123 #En_taller, Act 123 #En_taller, Act:123 #Finished, etc.
-  const match = subject.match(/Act[:\s]+\s*(\d+)\s*#(En_taller|En_campa|Finished|taller_out)/i);
+  const match = subject.match(/Act[:\s]+\s*(\d+)\s*#(En_taller|En_campa|Finished|taller_out|campa_out)/i);
 
   if (!match) {
     console.log("Correo ignorado, asunto no válido:", subject);
   } else {
     const actividadId = match[1];
-    const comando = match[2];
-
+    const comando = match[2].toLowerCase();
+  
     try {
-      if (/^en_taller$/i.test(comando)) {
-        // Igual que #taller: crea bloque en taller
+      if (comando === 'en_taller') {
         await rellenarPrimerBloqueLibre("taller", actividadId);
         console.log(`Bloque libre para taller (${actividadId}) actualizado.`);
-      } else if (/^en_campa$/i.test(comando)) {
-        // Igual que #campa: crea bloque en campa
+      } else if (comando === 'en_campa') {
         await rellenarPrimerBloqueLibre("campa", actividadId);
         console.log(`Bloque libre para campa (${actividadId}) actualizado.`);
-      } else if (/^finished$/i.test(comando)) {
-        // Buscar bloque con ese número de actividad y marcar terminado
+      } else if (comando === 'finished') {
         const ok = await terminarBloquePorActividad(actividadId);
         if (ok) {
           console.log(`Bloque con actividad ${actividadId} marcado como terminado.`);
         } else {
           console.log(`No se encontró bloque para terminar con actividad ${actividadId}.`);
         }
-      } else if (/^taller_out$/i.test(comando)) {
-        // Buscar bloque con ese número de actividad y liberar
-        const ok = await liberarBloquePorActividad(actividadId);
+      } else if (comando === 'taller_out') {
+        const ok = await liberarBloquePorActividad(actividadId, 'taller');
         if (ok) {
-          console.log(`Bloque con actividad ${actividadId} liberado.`);
+          console.log(`Bloque con actividad ${actividadId} liberado en taller.`);
         } else {
-          console.log(`No se encontró bloque para liberar con actividad ${actividadId}.`);
+          console.log(`No se encontró bloque para liberar con actividad ${actividadId} en taller.`);
+        }
+      } else if (comando === 'campa_out') {
+        const ok = await liberarBloquePorActividad(actividadId, 'campa');
+        if (ok) {
+          console.log(`Bloque con actividad ${actividadId} liberado en campa.`);
+        } else {
+          console.log(`No se encontró bloque para liberar con actividad ${actividadId} en campa.`);
         }
       }
     } catch (err) {
