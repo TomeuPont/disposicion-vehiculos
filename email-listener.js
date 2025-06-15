@@ -28,7 +28,8 @@ mailListener.start();
 
 mailListener.on("mail", async (mail) => {
   const subject = mail.subject || "";
-  const match = subject.match(/Act:\s*"(\d+)"\s*#(taller|campa)/i);
+  const match = subject.match(/Act:\s*(\d+)\s*#(taller|campa)/i);
+
   if (!match) {
     console.log("Correo ignorado, asunto no válido:", subject);
     return;
