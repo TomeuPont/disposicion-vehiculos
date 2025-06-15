@@ -82,7 +82,8 @@ function crearBloques() {
   // Definir número de bloques y offset según la ubicación
   const numBloques = ubicacionActual === 'taller' ? 50 : 40;
   const offset = ubicacionActual === 'taller' ? 0 : 50;
-  const posiciones = ubicacionActual === 'taller' ? posicionesTaller : posicionesCampa;
+  const posiciones = ubicacionActual === 'taller' ? posicionesTaller : 
+  posicionesCampa;
 
   for (let i = 0; i < numBloques; i++) {
     const div = document.createElement('div');
@@ -189,8 +190,8 @@ function crearBloques() {
     }, { passive: false });
   }
   renderizarBloques();
-  if (typeof actualizarLeyendaContador === "function") actualizarLeyendaContador();
-  if (typeof actualizarTotalVehiculos === "function") actualizarTotalVehiculos();
+  actualizarLeyendaContador();
+  actualizarTotalVehiculos();
   actualizarFondo();
 }
 
@@ -342,50 +343,7 @@ function renderizarBloques() {
   });
 }
 
-// --- Leyenda con contador de bloques por estado ---
-function contarBloquesPorEstado(datos, ubicacion) {
-  const conteo = {
-    libre: 0,
-    ocupado: 0,
-    trabajando: 0,
-    terminado: 0,
-  };
-  // Nuevos rangos:
-  let start, end;
-  if (ubicacion === 'taller') {
-    start = 0;
-    end = 49; // 50 bloques: 0-49
-  } else {
-    start = 50;
-    end = 89; // 40 bloques: 50-89
-  }
-  for (let i = start; i <= end; i++) {
-    const info = datos[i];
-    if (!info || !info.ocupado) {
-      conteo.libre++;
-    } else if (info.terminado) {
-      conteo.terminado++;
-    } else if (info.trabajador) {
-      conteo.trabajando++;
-    } else {
-      conteo.ocupado++;
-    }
-  }
-  return conteo;
-}
 
-
-function actualizarLeyendaContador() {
-  const leyenda = document.querySelector('.leyenda-colores');
-  if (!leyenda) return;
-  const conteo = contarBloquesPorEstado(datos, ubicacionActual);
-  leyenda.innerHTML = `
-    <span class="color-muestra libre"></span> Libre <b>(${conteo.libre})</b>
-    <span class="color-muestra ocupado"></span> Ocupado <b>(${conteo.ocupado})</b>
-    <span class="color-muestra trabajando"></span> Trabajando <b>(${conteo.trabajando})</b>
-    <span class="color-muestra terminado"></span> Terminado <b>(${conteo.terminado})</b>
-  `;
-}
 
 closeModal.onclick = () => modal.style.display = 'none';
 
@@ -600,23 +558,58 @@ function shouldHideFullscreenButton() {
 
 setInterval(monitorizarCalidadDatos, 86400000);
 
-function actualizarTotalVehiculos() {
-  function totalZona(zona) {
-    let total = 0;
-    const offset = zona === 'taller' ? 0 : 40;
-    for (let i = offset; i < offset + 40; i++) {
-      const info = datos[i];
-      if (info && info.ocupado) {
-        // ocupados = verde(ocupado), amarillo(trabajando), rojo(terminado)
-        total++;
-      }
-    }
-    return total;
+
+function contarBloquesPorEstado(datos, ubicacion) {
+  const conteo = {
+    libre: 0,
+    ocupado: 0,
+    trabajando: 0,
+    terminado: 0,
+  };
+  let start, end;
+  if (ubicacion === 'taller') {
+    start = 0;
+    end = 49;
+  } else {
+    start = 50;
+    end = 89;
   }
-  const totalTaller = totalZona('taller');
-  const totalCampa = totalZona('campa');
-  const div = document.getElementById('totalVehiculos');
-  if (div) {
-    div.innerHTML = `Vehículos en <b>Taller</b>: ${totalTaller} &nbsp;|&nbsp; <b>Campa</b>: ${totalCampa}`;
+  for (let i = start; i <= end; i++) {
+    const info = datos[i];
+    if (!info || !info.ocupado) {
+      conteo.libre++;
+    } else if (info.terminado) {
+      conteo.terminado++;
+    } else if (info.trabajador) {
+      conteo.trabajando++;
+    } else {
+      conteo.ocupado++;
+    }
+  }
+  return conteo;
+}
+
+function actualizarLeyendaContador() {
+  const leyenda = document.querySelector('.leyenda-colores');
+  if (!leyenda) return;
+  const conteo = contarBloquesPorEstado(datos, ubicacionActual);
+  leyenda.innerHTML = `
+    <span class="color-muestra libre"></span> Libre <b>(${conteo.libre})</b>
+    <span class="color-muestra ocupado"></span> Ocupado <b>(${conteo.ocupado})</b>
+    <span class="color-muestra trabajando"></span> Trabajando <b>(${conteo.trabajando})</b>
+    <span class="color-muestra terminado"></span> Terminado <b>(${conteo.terminado})</b>
+  `;
+}
+
+function actualizarTotalVehiculos() {
+  const conteoTaller = contarBloquesPorEstado(datos, 'taller');
+  const conteoCampa = contarBloquesPorEstado(datos, 'campa');
+  // Asegúrate de poner estos spans en tu HTML si quieres mostrar ambos:
+  // <span id="totalTaller"></span> <span id="totalCampa"></span>
+  if (document.getElementById('totalTaller')) {
+    document.getElementById('totalTaller').textContent = conteoTaller.ocupado + conteoTaller.trabajando + conteoTaller.terminado;
+  }
+  if (document.getElementById('totalCampa')) {
+    document.getElementById('totalCampa').textContent = conteoCampa.ocupado + conteoCampa.trabajando + conteoCampa.terminado;
   }
 }
