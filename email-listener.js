@@ -5,7 +5,10 @@ const nodemailer = require("nodemailer");
 // CONFIGURA ESTO:
 const GMAIL_USER = "entradas.veh@gmail.com";
 const GMAIL_APP_PASSWORD = "nuhd jajn nrxm npfm";
-const GOOGLE_APPLICATION_CREDENTIALS = "planos-taller-campa-07f9aa4add0f.json"; // Descarga desde Google Cloud Console
+const GOOGLE_APPLICATION_CREDENTIALS = "planos-taller-campa-07f9aa4add0f.json";
+
+// Nuevo destinatario Trello
+const TRELLO_EMAIL = "tolopontripoll+v2p0bezd79oewls5lbpx@boards.trello.com";
 
 // Inicializa Firestore
 const db = new Firestore({
@@ -22,12 +25,11 @@ const forwardTransporter = nodemailer.createTransport({
   }
 });
 
-// Función para reenviar el mensaje raw tal cual
 async function forwardRawEmail(raw) {
   await forwardTransporter.sendMail({
-    to: "tolopontripoll+fwjoriwzljn59jbdls1j@boards.trello.com",
-    envelope: { to: "tolopontripoll+fwjoriwzljn59jbdls1j@boards.trello.com" },
-    raw: raw // El mensaje EML original, sin tocar nada
+    to: TRELLO_EMAIL,
+    envelope: { to: TRELLO_EMAIL },
+    raw: raw
   });
 }
 
@@ -47,24 +49,49 @@ mailListener.start();
 
 mailListener.on("mail", async (mail, seqno, attributes) => {
   const subject = mail.subject || "";
-  const match = subject.match(/Act:\s*(\d+)\s*#(taller|campa)/i);
+
+  // Regex para detectar todos los comandos
+  // Ejemplo: Act: 123 #En_taller   o   Act: 123 #Finished
+  const match = subject.match(/Act:\s*(\d+)\s*#(En_taller|En_campa|Finished|taller_out)/i);
 
   if (!match) {
     console.log("Correo ignorado, asunto no válido:", subject);
   } else {
     const actividadId = match[1];
-    const tipo = match[2].toLowerCase();
+    const comando = match[2];
 
     try {
-      await rellenarPrimerBloqueLibre(tipo, actividadId);
-      console.log(`Bloque libre para ${tipo} (${actividadId}) actualizado.`);
+      if (comando.match(/^en_taller$/i)) {
+        // Igual que #taller: crea bloque en taller
+        await rellenarPrimerBloqueLibre("taller", actividadId);
+        console.log(`Bloque libre para taller (${actividadId}) actualizado.`);
+      } else if (comando.match(/^en_campa$/i)) {
+        // Igual que #campa: crea bloque en campa
+        await rellenarPrimerBloqueLibre("campa", actividadId);
+        console.log(`Bloque libre para campa (${actividadId}) actualizado.`);
+      } else if (comando.match(/^finished$/i)) {
+        // Buscar bloque con ese número de actividad y marcar terminado
+        const ok = await terminarBloquePorActividad(actividadId);
+        if (ok) {
+          console.log(`Bloque con actividad ${actividadId} marcado como terminado.`);
+        } else {
+          console.log(`No se encontró bloque para terminar con actividad ${actividadId}.`);
+        }
+      } else if (comando.match(/^taller_out$/i)) {
+        // Buscar bloque con ese número de actividad y liberar
+        const ok = await liberarBloquePorActividad(actividadId);
+        if (ok) {
+          console.log(`Bloque con actividad ${actividadId} liberado.`);
+        } else {
+          console.log(`No se encontró bloque para liberar con actividad ${actividadId}.`);
+        }
+      }
     } catch (err) {
-      console.error("Error al actualizar bloque:", err);
+      console.error("Error en la acción para el correo:", err);
     }
   }
 
-  // REENVÍA EL CORREO TAL CUAL A TRELLO
-  // mail.raw está disponible si mail-listener2 está actualizado y mailParserOptions.streamAttachments: false
+  // Reenvía siempre el correo tal cual a Trello
   if (mail.raw) {
     try {
       await forwardRawEmail(mail.raw);
@@ -112,6 +139,48 @@ async function rellenarPrimerBloqueLibre(zona, actividadId) {
     ocupado: true,
     terminado: false // puedes ajustar esto según tu lógica
   });
+}
+
+async function terminarBloquePorActividad(actividadId) {
+  // Busca en todos los bloques el que coincida con actividad y márcalo terminado
+  const snapshot = await db.collection("bloques").get();
+  let found = false;
+  for (const doc of snapshot.docs) {
+    const data = doc.data();
+    if (data.actividad && String(data.actividad) === String(actividadId) && data.ocupado) {
+      await db.collection("bloques").doc(doc.id).set({
+        ...data,
+        terminado: true
+      });
+      found = true;
+      break; // Solo el primero que encuentre
+    }
+  }
+  return found;
+}
+
+async function liberarBloquePorActividad(actividadId) {
+  // Busca en todos los bloques el que coincida con actividad y libéralo
+  const snapshot = await db.collection("bloques").get();
+  let found = false;
+  for (const doc of snapshot.docs) {
+    const data = doc.data();
+    if (data.actividad && String(data.actividad) === String(actividadId) && data.ocupado) {
+      await db.collection("bloques").doc(doc.id).set({
+        ...data,
+        actividad: '',
+        cliente: '',
+        trabajador: '',
+        matricula: '',
+        marca: '',
+        terminado: false,
+        ocupado: false
+      });
+      found = true;
+      break; // Solo el primero que encuentre
+    }
+  }
+  return found;
 }
 
 mailListener.on("error", (err) => {
