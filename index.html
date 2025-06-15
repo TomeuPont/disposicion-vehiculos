@@ -43,7 +43,6 @@
     <input type="text" id="matricula" placeholder="Matrícula">
     <input type="text" id="marca" placeholder="Marca">
     <input type="text" id="cliente" placeholder="Cliente">
-    <!-- Cambiar el select trabajador a: -->
     <select id="trabajador" style="width: 100%; margin-bottom: 10px; padding: 8px;">
       <option value="">Seleccionar trabajador...</option>
       <!-- Las opciones se cargarán dinámicamente -->
@@ -80,15 +79,11 @@
   
 <div id="mensajeEstado" style="display: none;">Estado</div>
 
-<!-- CONTADORES DE VEHÍCULOS (puedes mover este bloque donde quieras, por ejemplo encima del plano o al final del lateral) -->
-<div style="margin: 20px 0 10px 20px;">
+<!-- Bloque de totales y leyenda (sustituye donde estaba la versión) -->
+<div class="version">
   <div>Vehículos en Taller: <span id="totalTaller">0</span></div>
   <div>Vehículos en Campa: <span id="totalCampa">0</span></div>
-</div>
-
-<div class="version">
-  Versión 1.9.38
-  <div class="leyenda-colores">
+  <div class="leyenda-colores" style="margin-top:8px;">
     <span class="color-muestra libre"></span> Libre
     <span class="color-muestra ocupado"></span> Ocupado
     <span class="color-muestra trabajando"></span> Trabajando
