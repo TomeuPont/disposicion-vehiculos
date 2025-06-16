@@ -143,13 +143,13 @@ async function rellenarPrimerBloqueLibre(zona, actividadId) {
   
     // ORDEN CORRECTO: arriba (menor topPct), luego izquierda (menor leftPct)
     bloques.sort((a, b) => {
-      const topA = Number(a.topPct) || 0;
-      const topB = Number(b.topPct) || 0;
-      const leftA = Number(a.leftPct) || 0;
-      const leftB = Number(b.leftPct) || 0;
-      if (topA !== topB) return topA - topB;
-      return leftA - leftB;
-    });
+        const topA = Number(a.topPct) || 0;
+        const topB = Number(b.topPct) || 0;
+        const leftA = Number(a.leftPct) || 0;
+        const leftB = Number(b.leftPct) || 0;
+        if (topA !== topB) return topB - topA; // Descendente
+        return leftA - leftB;
+      });
   
     const elegido = bloques[0];
   
