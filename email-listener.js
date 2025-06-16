@@ -161,6 +161,7 @@ async function rellenarPrimerBloqueLibre(zona, actividadId) {
     });
   }
 
+
 async function terminarBloquePorActividad(actividadId) {
   const snapshot = await db.collection("bloques").get();
   let found = false;
