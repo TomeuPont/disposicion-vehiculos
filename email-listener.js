@@ -142,14 +142,28 @@ async function rellenarPrimerBloqueLibre(zona, actividadId) {
     if (bloques.length === 0) throw new Error("No hay bloques libres en " + zona);
   
     // ORDEN CORRECTO: arriba (menor topPct), luego izquierda (menor leftPct)
-    bloques.sort((a, b) => {
-        const topA = Number(a.topPct) || 0;
-        const topB = Number(b.topPct) || 0;
-        const leftA = Number(a.leftPct) || 0;
-        const leftB = Number(b.leftPct) || 0;
-        if (topA !== topB) return topB - topA; // Descendente
-        return leftA - leftB;
-      });
+    // Antes del sort
+console.log("=== BLOQUES LIBRES ===");
+bloques.forEach(b => {
+  console.log(`ID: ${b.id} topPct: ${b.topPct} leftPct: ${b.leftPct}`);
+});
+
+// El sort (prueba con topA - topB, si sale mal prueba topB - topA)
+bloques.sort((a, b) => {
+  const topA = Number(a.topPct) || 0;
+  const topB = Number(b.topPct) || 0;
+  const leftA = Number(a.leftPct) || 0;
+  const leftB = Number(b.leftPct) || 0;
+  if (topA !== topB) return topA - topB;
+  return leftA - leftB;
+});
+
+// Después del sort
+console.log("=== BLOQUES ORDENADOS ===");
+bloques.forEach(b => {
+  console.log(`ID: ${b.id} topPct: ${b.topPct} leftPct: ${b.leftPct}`);
+});
+console.log("Elegido:", bloques[0]);
   
     const elegido = bloques[0];
   
